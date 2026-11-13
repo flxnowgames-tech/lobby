@@ -141,6 +141,36 @@
         </div>
     </footer>
 
+    <!-- MODAL DE CONTRASEÑA CON ESTILO LOBBY -->
+    <div id="password-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-200 p-4">
+        <div class="glass-card w-full max-w-sm rounded-2xl p-6 shadow-2xl relative overflow-hidden border border-slate-800 text-center">
+            <div class="absolute -right-8 -top-8 w-32 h-32 bg-red-500/10 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-red-600 via-rose-500 to-amber-500 flex items-center justify-center shadow-lg shadow-red-500/20 text-white mx-auto mb-4 text-lg">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            
+            <h3 class="text-base font-extrabold text-white tracking-tight mb-1">Acceso Restringido</h3>
+            <p class="text-xs text-slate-400 mb-5">Introduce la contraseña para entrar a <span class="text-red-400 font-semibold">Botonera</span>:</p>
+            
+            <input type="password" id="project-password-input" onkeydown="if(event.key === 'Enter') verifyProjectPassword()" placeholder="••••••••" 
+                class="w-full px-4 py-2.5 bg-slate-900/90 border border-slate-800 rounded-xl focus:outline-none focus:border-red-500 text-xs text-center text-slate-100 placeholder-slate-600 tracking-widest transition-all mb-3">
+            
+            <p id="password-error" class="hidden text-[11px] text-red-400 font-semibold mb-3 flex items-center justify-center gap-1">
+                <i class="fa-solid fa-circle-exclamation"></i> Contraseña incorrecta
+            </p>
+            
+            <div class="flex items-center gap-2 pt-2">
+                <button onclick="closePasswordModal()" class="flex-1 py-2.5 px-3 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold border border-slate-700/60 transition-all">
+                    Cancelar
+                </button>
+                <button onclick="verifyProjectPassword()" class="flex-1 py-2.5 px-3 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-red-600/20 flex items-center justify-center gap-1.5">
+                    Acceder <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL DE VISTA PREVIA (IFRAME) -->
     <div id="preview-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-200 p-4">
         <div class="glass-card w-full max-w-5xl h-[85vh] rounded-2xl flex flex-col shadow-2xl relative overflow-hidden border border-slate-800">
@@ -165,7 +195,7 @@
     </div>
 
     <script>
-        // Proyectos configurados
+        // Proyectos configurados[cite: 3]
         const projects = [
             {
                 id: 1,
@@ -213,7 +243,7 @@
                 desc: "Herramienta interactiva para traducción y conversión de código binario.",
                 url: "https://mandarina703.github.io/Binario/",
                 category: "Herramientas",
-                icon: "fa-binary",
+                icon: "fa-code",
                 color: "from-teal-500 to-cyan-600",
                 favorite: false
             },
@@ -227,9 +257,30 @@
                 color: "from-blue-600 to-indigo-600",
                 favorite: false
             },
+            {
+                id: 7,
+                name: "Faltas de ortografía",
+                desc: "Herramienta creada para corregir faltas de ortografia",
+                url: "https://mandarina703.github.io/Faltas/",
+                category: "Educación",
+                icon: "fa-x",
+                color: "from-blue-600 to-indigo-600",
+                favorite: false
+            },
+            {
+                id: 8,
+                name: "Botonera",
+                desc: "Herramienta creada para poner los sonidos que quieras",
+                url: "https://mandarina703.github.io/Botones/",
+                category: "Herramientas",
+                icon: "fa-music",
+                color: "from-blue-600 to-indigo-600",
+                favorite: false
+            },
         ];
 
         let currentFilter = 'all';
+        let pendingAction = null;
 
         window.onload = function() {
             renderProjects();
@@ -259,6 +310,15 @@
             filtered.forEach(p => {
                 const card = document.createElement('div');
                 card.className = "project-card glass-card rounded-2xl p-5 flex flex-col justify-between border border-slate-800/80 relative overflow-hidden";
+                
+                let previewAction = `openPreview('${p.url}', '${p.name.replace(/'/g, "\\'")}')`;
+                let visitAction = `href="${p.url}" target="_blank"`;
+
+                if (p.name === "Botonera") {
+                    previewAction = `checkPasswordAndExecute(() => openPreview('${p.url}', '${p.name.replace(/'/g, "\\'")}'))`;
+                    visitAction = `onclick="event.preventDefault(); checkPasswordAndExecute(() => window.open('${p.url}', '_blank'))" href="#"`;
+                }
+
                 card.innerHTML = `
                     <div>
                         <div class="flex items-start justify-between mb-3">
@@ -279,10 +339,10 @@
                     </div>
 
                     <div class="flex items-center gap-2 pt-3 border-t border-slate-800/80">
-                        <button onclick="openPreview('${p.url}', '${p.name.replace(/'/g, "\\'")}')" class="flex-grow py-2 px-3 bg-slate-900 hover:bg-slate-800 text-slate-200 rounded-xl text-xs font-semibold border border-slate-700/60 transition-all flex items-center justify-center gap-1.5">
+                        <button onclick="${previewAction}" class="flex-grow py-2 px-3 bg-slate-900 hover:bg-slate-800 text-slate-200 rounded-xl text-xs font-semibold border border-slate-700/60 transition-all flex items-center justify-center gap-1.5">
                             <i class="fa-solid fa-eye text-red-400 text-[11px]"></i> Previsualizar
                         </button>
-                        <a href="${p.url}" target="_blank" class="py-2 px-3.5 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-red-600/20 flex items-center justify-center gap-1.5">
+                        <a ${visitAction} class="py-2 px-3.5 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-red-600/20 flex items-center justify-center gap-1.5">
                             Visitar <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
                         </a>
                     </div>
@@ -322,6 +382,36 @@
         function updateStats() {
             document.getElementById('stat-total').innerText = projects.length;
             document.getElementById('stat-favs').innerText = projects.filter(p => p.favorite).length;
+        }
+
+        // Control de contraseña con estilo Lobby
+        function checkPasswordAndExecute(actionCallback) {
+            pendingAction = actionCallback;
+            const modal = document.getElementById('password-modal');
+            const input = document.getElementById('project-password-input');
+            input.value = '';
+            document.getElementById('password-error').classList.add('hidden');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => input.focus(), 100);
+        }
+
+        function verifyProjectPassword() {
+            const pass = document.getElementById('project-password-input').value.trim();
+            if (pass === "2105") {
+                const actionToRun = pendingAction;
+                closePasswordModal();
+                if (actionToRun) {
+                    actionToRun();
+                }
+            } else {
+                document.getElementById('password-error').classList.remove('hidden');
+            }
+        }
+
+        function closePasswordModal() {
+            const modal = document.getElementById('password-modal');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            pendingAction = null;
         }
 
         // Modal de Vista Previa (Iframe)
