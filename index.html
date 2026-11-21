@@ -195,7 +195,6 @@
     </div>
 
     <script>
-        // Proyectos configurados[cite: 3]
         const projects = [
             {
                 id: 1,
@@ -311,8 +310,21 @@
 
         let currentFilter = 'all';
         let pendingAction = null;
+        let expectedPassword = "";
+
+        async function loadConfig() {
+            try {
+                const res = await fetch("./config.json", { cache: "no-store" });
+                if (!res.ok) throw new Error("Error al cargar config.json");
+                const data = await res.json();
+                expectedPassword = (data.botoneraPassword || "").trim();
+            } catch (err) {
+                console.error(err);
+            }
+        }
 
         window.onload = function() {
+            loadConfig();
             renderProjects();
             updateStats();
         };
@@ -414,7 +426,6 @@
             document.getElementById('stat-favs').innerText = projects.filter(p => p.favorite).length;
         }
 
-        // Control de contraseña con estilo Lobby
         function checkPasswordAndExecute(actionCallback) {
             pendingAction = actionCallback;
             const modal = document.getElementById('password-modal');
@@ -425,9 +436,13 @@
             setTimeout(() => input.focus(), 100);
         }
 
-        function verifyProjectPassword() {
+        async function verifyProjectPassword() {
+            if (!expectedPassword) {
+                await loadConfig();
+            }
+
             const pass = document.getElementById('project-password-input').value.trim();
-            if (pass === "javi decora neon") {
+            if (expectedPassword && pass === expectedPassword) {
                 const actionToRun = pendingAction;
                 closePasswordModal();
                 if (actionToRun) {
@@ -444,7 +459,6 @@
             pendingAction = null;
         }
 
-        // Modal de Vista Previa (Iframe)
         function openPreview(url, title) {
             const modal = document.getElementById('preview-modal');
             document.getElementById('preview-title').innerText = title;
