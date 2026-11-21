@@ -1,2212 +1,463 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ClimaQuest - Domina los Climogramas (20 Niveles)</title>
-    <!-- Tailwind CSS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manzana & Mandarina - Lobby de Proyectos</title>
+    <!-- Favicon con icono de manzana -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍎</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Nunito -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Canvas Confetti -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
-
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fef2f2',
+                            100: '#fee2e2',
+                            500: '#ef4444',
+                            600: '#dc2626',
+                            700: '#b91c1c',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            font-family: 'Nunito', sans-serif;
-            background-color: #f7f9fa;
-            color: #3c3c3c;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
+        body { font-family: 'Inter', sans-serif; }
+        .code-font { font-family: 'Fira Code', monospace; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #090d16; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
-
-        .min-h-dvh-screen {
-            min-height: 100vh;
-            min-height: 100dvh;
+        .project-card {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
-        /* Botones 3D táctiles estilo Duolingo */
-        .duo-btn {
-            transition: all 0.1s ease;
-            border-width: 2px;
-            border-bottom-width: 4px;
-            cursor: pointer;
-            touch-action: manipulation;
-        }
-        .duo-btn:active:not(:disabled) {
-            transform: translateY(2px);
-            border-bottom-width: 2px;
-        }
-        .duo-btn:disabled {
-            opacity: 0.55;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .duo-btn-green {
-            background-color: #58cc02;
-            border-color: #46a302;
-            color: white;
-        }
-        .duo-btn-green:hover:not(:disabled) { background-color: #61e002; }
-
-        .duo-btn-blue {
-            background-color: #1cb0f6;
-            border-color: #1899d6;
-            color: white;
-        }
-        .duo-btn-blue:hover:not(:disabled) { background-color: #20bcff; }
-
-        .duo-btn-red {
-            background-color: #ff4b4b;
-            border-color: #ea2b2b;
-            color: white;
-        }
-
-        .duo-btn-white {
-            background-color: #ffffff;
-            border-color: #e5e5e5;
-            color: #4b4b4b;
-        }
-        .duo-btn-white:hover:not(:disabled) {
-            background-color: #f7f7f7;
-            border-color: #d4d4d4;
-        }
-
-        /* Estados de selección */
-        .option-selected {
-            background-color: #ddf4ff !important;
-            border-color: #1cb0f6 !important;
-            color: #1899d6 !important;
-        }
-        .option-correct {
-            background-color: #d7ffb8 !important;
-            border-color: #58cc02 !important;
-            color: #46a302 !important;
-        }
-        .option-wrong {
-            background-color: #ffdfe0 !important;
-            border-color: #ff4b4b !important;
-            color: #ea2b2b !important;
-        }
-
-        /* Nodos del Camino de Aprendizaje */
-        .level-node {
-            width: 78px;
-            height: 72px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            transition: transform 0.15s ease;
-        }
-        .level-node-unlocked {
-            box-shadow: 0 7px 0 var(--shadow-color);
-            cursor: pointer;
-        }
-        .level-node-unlocked:active {
-            transform: translateY(5px);
-            box-shadow: 0 2px 0 var(--shadow-color);
-        }
-        .level-node-locked {
-            background-color: #e5e5e5;
-            box-shadow: 0 7px 0 #afafaf;
-            color: #afafaf;
-            cursor: not-allowed;
-        }
-
-        @keyframes floatPulse {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-5px); }
-        }
-        .animate-float {
-            animation: floatPulse 2s ease-in-out infinite;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-5px); }
-            40%, 80% { transform: translateX(5px); }
-        }
-        .animate-shake {
-            animation: shake 0.4s ease-in-out;
-        }
-
-        /* Panel inferior deslizante con soporte safe-area móvil */
-        .feedback-drawer {
-            transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-            padding-bottom: max(1rem, env(safe-area-inset-bottom));
-        }
-        .feedback-hidden { transform: translateY(105%); }
-        .feedback-visible { transform: translateY(0%); }
-
-        .safe-bottom-bar {
-            padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+        .project-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px -10px rgba(239, 68, 68, 0.25);
+            border-color: rgba(239, 68, 68, 0.4);
         }
     </style>
 </head>
-<body class="min-h-dvh-screen flex flex-col">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-red-500 selection:text-white">
 
-    <!-- ==================== BARRA SUPERIOR GLOBAL (HOME) ==================== -->
-    <header id="home-header" class="sticky top-0 z-30 bg-white border-b-2 border-gray-200 px-3 sm:px-4 py-2.5 sm:py-3">
-        <div class="max-w-3xl mx-auto flex items-center justify-between gap-2">
-            <!-- Logo -->
-            <div class="flex items-center gap-2">
-                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#58cc02] flex items-center justify-center text-white text-lg sm:text-xl shadow-sm shrink-0">
-                    <i class="fa-solid fa-earth-americas"></i>
+    <!-- HEADER / NAVEGACIÓN -->
+    <header class="sticky top-0 z-40 bg-slate-900/80 backdrop-blur-md border-b border-slate-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-red-600 via-rose-500 to-amber-500 flex items-center justify-center shadow-lg shadow-red-500/20 text-xl">
+                    🍎
                 </div>
                 <div>
-                    <h1 class="text-lg sm:text-xl font-black tracking-tight text-[#58cc02] leading-none">ClimaQuest</h1>
-                    <span class="text-[11px] sm:text-xs font-bold text-gray-400">20 Niveles · 8 Bioclimas</span>
+                    <h1 class="text-base sm:text-lg font-extrabold bg-gradient-to-r from-red-400 via-rose-300 to-amber-300 bg-clip-text text-transparent leading-tight">
+                        Manzana & Mandarina Lobby
+                    </h1>
+                    <p class="text-[10px] text-slate-400 font-medium">Portal oficial de aplicaciones web</p>
                 </div>
             </div>
 
-            <!-- Estadísticas del Jugador y Sonido -->
-            <div class="flex items-center gap-1.5 sm:gap-2.5">
-                <!-- Racha -->
-                <div class="flex items-center gap-1 bg-orange-50 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl border border-orange-200" title="Mejor racha de aciertos">
-                    <i class="fa-solid fa-fire text-orange-500 text-xs sm:text-base"></i>
-                    <span id="stat-streak" class="font-extrabold text-orange-600 text-xs sm:text-sm">0</span>
-                </div>
-
-                <!-- XP Total -->
-                <div class="flex items-center gap-1 bg-sky-50 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl border border-sky-200" title="Puntos de experiencia">
-                    <i class="fa-solid fa-bolt text-sky-500 text-xs sm:text-base"></i>
-                    <span id="stat-xp" class="font-extrabold text-sky-600 text-xs sm:text-sm">0 XP</span>
-                </div>
-
-                <!-- Coronas -->
-                <div class="flex items-center gap-1 bg-amber-50 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl border border-amber-200" title="Coronas conseguidas">
-                    <i class="fa-solid fa-crown text-amber-500 text-xs sm:text-base"></i>
-                    <span id="stat-crowns" class="font-extrabold text-amber-600 text-xs sm:text-sm">0/60</span>
-                </div>
-
-                <!-- Botón Sonido -->
-                <button id="btn-sound-toggle" onclick="toggleSound()" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl border-2 border-gray-200 bg-white text-gray-500 hover:text-sky-500 flex items-center justify-center text-sm transition shrink-0" title="Activar/Desactivar sonido">
-                    <i id="sound-icon" class="fa-solid fa-volume-high"></i>
-                </button>
+            <div class="flex items-center gap-2 text-xs text-slate-400">
+                <span class="px-3 py-1.5 rounded-full bg-slate-800 border border-slate-700 flex items-center gap-1.5 font-semibold">
+                    <span>🍊 Mandarina</span>
+                    <span class="text-slate-600">•</span>
+                    <span>🍎 Manzana</span>
+                </span>
             </div>
         </div>
     </header>
 
-    <!-- ==================== VISTA 1: MAPA DE 20 NIVELES POR BLOQUES ==================== -->
-    <main id="home-view" class="flex-1 max-w-2xl w-full mx-auto px-3 sm:px-4 py-4 sm:py-6 pb-24 overflow-x-hidden">
-        
-        <!-- Banner Guía Rápida de Gaussen y Progreso -->
-        <div class="bg-white border-2 border-gray-200 rounded-2xl p-3.5 sm:p-4 mb-5 shadow-sm flex flex-row items-center justify-between gap-3">
-            <div class="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
-                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center text-xl sm:text-2xl shrink-0">
-                    <i class="fa-solid fa-chart-column"></i>
-                </div>
-                <div class="min-w-0">
-                    <div class="flex items-center gap-2">
-                        <h2 class="font-extrabold text-gray-800 text-sm sm:text-base truncate">Escala de Gaussen (1°C = 2mm)</h2>
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+        <!-- BANNER DE BIENVENIDA Y ESTADÍSTICAS -->
+        <div class="glass-card rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-2xl">
+            <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-red-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div class="space-y-2">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold">
+                        <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> Sistema Operativo Activo
                     </div>
-                    <p class="text-[11px] sm:text-sm text-gray-500 font-semibold leading-snug">
-                        Si la <span class="text-red-500 font-bold">línea roja</span> supera las <span class="text-blue-500 font-bold">barras azules</span>, ¡hay aridez!
+                    <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight">Bienvenido al Panel de Manzana & Mandarina</h2>
+                    <p class="text-slate-400 text-xs sm:text-sm max-w-xl">
+                        Explora, prueba y gestiona todas vuestras aplicaciones web desde un solo lugar con previsualización integrada.
                     </p>
                 </div>
-            </div>
-            <div class="flex items-center gap-2 shrink-0">
-                <button onclick="scrollToCurrentLevel()" class="duo-btn duo-btn-green px-3 py-2 rounded-xl font-extrabold text-xs uppercase tracking-wider" title="Ir al nivel actual">
-                    <i class="fa-solid fa-location-crosshairs"></i>
-                </button>
-                <button onclick="openGuideModal()" class="duo-btn duo-btn-white px-3 sm:px-4 py-2 rounded-xl font-extrabold text-xs uppercase tracking-wider">
-                    <i class="fa-solid fa-book-open sm:mr-1 text-sky-500"></i> <span class="hidden sm:inline">Chuleta</span>
-                </button>
+                <div class="flex gap-3 bg-slate-900/80 p-3 rounded-xl border border-slate-800 text-center">
+                    <div class="px-4 border-r border-slate-800">
+                        <div id="stat-total" class="text-xl font-black text-white">5</div>
+                        <div class="text-[10px] text-slate-400 uppercase font-bold">Proyectos</div>
+                    </div>
+                    <div class="px-4">
+                        <div id="stat-favs" class="text-xl font-black text-red-400">0</div>
+                        <div class="text-[10px] text-slate-400 uppercase font-bold">Favoritos</div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Contenedor del Camino de 20 Niveles -->
-        <div id="levels-container" class="flex flex-col items-center space-y-6 relative">
-            <!-- Se genera dinámicamente con JS -->
+        <!-- BARRA DE BÚSQUEDA Y FILTROS -->
+        <div class="flex flex-col sm:flex-row gap-3 items-center justify-between">
+            <div class="relative w-full sm:w-80">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input type="text" id="search-input" oninput="filterProjects()" placeholder="Buscar proyectos..." 
+                    class="w-full pl-10 pr-4 py-2.5 bg-slate-900/90 border border-slate-800 rounded-xl focus:outline-none focus:border-red-500 text-xs text-slate-100 placeholder-slate-500 transition-all">
+            </div>
+
+            <div class="flex flex-wrap gap-1.5 w-full sm:w-auto" id="filter-buttons">
+                <button onclick="setCategory('all')" id="btn-cat-all" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-600 text-white transition-all">Todos</button>
+                <button onclick="setCategory('Educación')" id="btn-cat-Educación" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-all">Educación</button>
+                <button onclick="setCategory('Gaming')" id="btn-cat-Gaming" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-all">Gaming</button>
+                <button onclick="setCategory('Herramientas')" id="btn-cat-Herramientas" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-all">Herramientas</button>
+            </div>
         </div>
 
-        <!-- Botón de Reiniciar Progreso -->
-        <div class="mt-14 pt-6 border-t border-gray-200 flex justify-center">
-            <button onclick="openResetModal()" class="text-xs font-bold text-gray-400 hover:text-red-500 transition flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-red-50">
-                <i class="fa-solid fa-rotate-left"></i> Reiniciar todo el progreso
-            </button>
+        <!-- GRID DE PROYECTOS -->
+        <div id="projects-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-5">
+            <!-- Tarjetas renderizadas por JavaScript -->
         </div>
+
     </main>
 
-    <!-- ==================== VISTA 2: PANTALLA DE LECCIÓN / QUIZ ==================== -->
-    <section id="quiz-view" class="hidden flex-1 flex flex-col bg-white min-h-dvh-screen">
-        
-        <!-- Barra Superior Compacta -->
-        <div class="max-w-4xl w-full mx-auto px-3 sm:px-4 pt-3 sm:pt-4 pb-2 flex items-center gap-2.5 sm:gap-4 shrink-0">
-            <button onclick="confirmExitQuiz()" class="text-gray-400 hover:text-gray-600 text-xl sm:text-2xl p-1 transition shrink-0" title="Salir de la lección">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-
-            <!-- Barra verde brillante -->
-            <div class="flex-1 h-3.5 sm:h-4 bg-gray-200 rounded-full overflow-hidden p-0.5">
-                <div id="quiz-progress-bar" class="h-full bg-[#58cc02] rounded-full transition-all duration-500 ease-out relative" style="width: 0%">
-                    <div class="w-full h-1 bg-white/30 rounded-full mt-0.5"></div>
-                </div>
-            </div>
-
-            <!-- Temporizador (solo en modo contrarreloj) -->
-            <div id="quiz-timer-badge" class="hidden flex items-center gap-1 bg-amber-100 border border-amber-300 text-amber-800 px-2.5 py-0.5 rounded-xl font-black text-xs sm:text-sm shrink-0">
-                <i class="fa-solid fa-stopwatch text-amber-600"></i>
-                <span id="quiz-timer-text">25s</span>
-            </div>
-
-            <!-- Racha en partida -->
-            <div id="quiz-streak-badge" class="hidden sm:flex items-center gap-1 text-orange-500 font-black text-sm shrink-0">
-                <i class="fa-solid fa-fire"></i> <span id="quiz-streak-count">0</span>
-            </div>
-
-            <!-- Vidas -->
-            <div class="flex items-center gap-1 text-red-500 font-black text-base sm:text-lg shrink-0" id="quiz-hearts-container">
-                <i class="fa-solid fa-heart"></i>
-                <span id="quiz-hearts-count">3</span>
-            </div>
+    <!-- FOOTER -->
+    <footer class="mt-auto border-t border-slate-800/80 bg-slate-900/40 py-4 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p class="flex items-center gap-1.5">
+                <span>Desarrollado por</span>
+                <span class="font-bold text-amber-400">Mandarina 🍊</span>
+                <span>y</span>
+                <span class="font-bold text-red-400">Manzana 🍎</span>
+            </p>
+            <p class="text-[11px]">Portal Web Central • 2026</p>
         </div>
+    </footer>
 
-        <!-- Contenido Principal del Ejercicio -->
-        <div class="flex-1 max-w-4xl w-full mx-auto px-3 sm:px-4 py-1 sm:py-2 pb-28 sm:pb-36 flex flex-col justify-between sm:justify-center">
+    <!-- MODAL DE CONTRASEÑA CON ESTILO LOBBY -->
+    <div id="password-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-200 p-4">
+        <div class="glass-card w-full max-w-sm rounded-2xl p-6 shadow-2xl relative overflow-hidden border border-slate-800 text-center">
+            <div class="absolute -right-8 -top-8 w-32 h-32 bg-red-500/10 rounded-full blur-2xl pointer-events-none"></div>
             
-            <!-- Encabezado de la Pregunta -->
-            <div class="mb-2 sm:mb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
-                <div class="flex items-center justify-between sm:block">
-                    <div class="flex items-center gap-1.5 flex-wrap">
-                        <span id="quiz-level-tag" class="inline-block text-[11px] sm:text-xs font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-lg bg-purple-100 text-purple-700">
-                            Nivel 1
-                        </span>
-                        <span id="quiz-mode-badge" class="hidden inline-flex items-center gap-1 text-[11px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-lg bg-amber-100 text-amber-800">
-                            <i class="fa-solid fa-bolt"></i> Modo Especial
-                        </span>
-                    </div>
-                    <button onclick="openGuideModal()" class="sm:hidden text-[11px] font-extrabold text-sky-600 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded-lg shrink-0">
-                        <i class="fa-solid fa-book-open mr-1"></i>Chuleta
-                    </button>
-                    <h2 id="quiz-question-title-desktop" class="hidden sm:block text-xl sm:text-2xl font-black text-gray-800 mt-1">
-                        ¿A qué bioclima pertenece este climograma?
-                    </h2>
-                </div>
-                <h2 id="quiz-question-title-mobile" class="sm:hidden text-base font-black text-gray-800 leading-tight">
-                    ¿Qué bioclima muestra este climograma?
-                </h2>
-                <!-- Pista contextual -->
-                <div id="quiz-hint-pill" class="hidden bg-amber-50 border border-amber-200 text-amber-800 px-2.5 py-1 rounded-xl text-[11px] sm:text-xs font-bold flex items-center gap-1.5">
-                    <i class="fa-solid fa-lightbulb text-amber-500 shrink-0"></i>
-                    <span id="quiz-hint-text" class="leading-tight">Pista</span>
-                </div>
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-red-600 via-rose-500 to-amber-500 flex items-center justify-center shadow-lg shadow-red-500/20 text-white mx-auto mb-4 text-lg">
+                <i class="fa-solid fa-lock"></i>
             </div>
-
-            <!-- Grid Responsivo: Climograma y Opciones -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-2.5 sm:gap-5 items-start">
-                
-                <!-- Tarjeta del Climograma SVG -->
-                <div class="lg:col-span-7 bg-white border-2 border-gray-200 rounded-2xl p-2 sm:p-4 shadow-sm">
-                    <!-- Métricas clave (o banner de Lectura Pura) -->
-                    <div id="chart-metrics-row" class="grid grid-cols-3 gap-1.5 mb-1.5 sm:mb-2 pb-1.5 sm:pb-2 border-b border-gray-100 text-[11px] sm:text-xs text-center">
-                        <div class="font-extrabold text-red-600 bg-red-50 px-1.5 py-1 rounded-lg border border-red-100 truncate">
-                            <i class="fa-solid fa-temperature-half mr-0.5"></i>Media: <span id="chart-tma">--</span>°C
-                        </div>
-                        <div class="font-extrabold text-blue-600 bg-blue-50 px-1.5 py-1 rounded-lg border border-blue-100 truncate">
-                            <i class="fa-solid fa-droplet mr-0.5"></i>Total: <span id="chart-ptot">--</span>mm
-                        </div>
-                        <div class="font-extrabold text-gray-600 bg-gray-100 px-1.5 py-1 rounded-lg border border-gray-200 truncate">
-                            <i class="fa-solid fa-arrows-up-down mr-0.5"></i>Amp: <span id="chart-amp">--</span>°C
-                        </div>
-                    </div>
-
-                    <div id="chart-blind-banner" class="hidden mb-1.5 sm:mb-2 pb-1.5 border-b border-indigo-100 text-center bg-indigo-50 text-indigo-700 font-extrabold text-[11px] sm:text-xs py-1 px-2 rounded-lg">
-                        <i class="fa-solid fa-eye-slash mr-1"></i> Modo Lectura Pura: interpreta la curva roja y las barras azules sin resumen numérico
-                    </div>
-
-                    <!-- Contenedor SVG del Climograma -->
-                    <div id="climograph-svg-container" class="w-full max-h-[205px] sm:max-h-none flex items-center justify-center overflow-hidden">
-                        <!-- SVG renderizado dinámicamente -->
-                    </div>
-
-                    <!-- Leyenda inferior -->
-                    <div class="flex items-center justify-center gap-4 sm:gap-6 mt-1 sm:mt-2 text-[10px] sm:text-xs font-bold text-gray-500">
-                        <div class="flex items-center gap-1">
-                            <span class="w-2.5 h-2.5 rounded-xs bg-[#3b82f6] inline-block"></span>
-                            <span>Precip. (mm)</span>
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <span class="w-3.5 h-0.5 bg-[#ef4444] inline-block relative">
-                                <span class="w-1.5 h-1.5 rounded-full bg-[#ef4444] absolute -top-[2px] left-1"></span>
-                            </span>
-                            <span>Temp. (°C)</span>
-                        </div>
-                        <div class="text-gray-400">
-                            Gaussen 1°C=2mm
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Columna de Opciones -->
-                <div class="lg:col-span-5 grid grid-cols-2 lg:grid-cols-1 gap-2" id="options-container">
-                    <!-- Botones generados dinámicamente -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Barra Inferior Fija: Botón Comprobar -->
-        <div id="check-bar" class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xs border-t-2 border-gray-200 px-3 pt-2.5 safe-bottom-bar z-20">
-            <div class="max-w-4xl mx-auto flex items-center justify-between">
-                <div class="hidden sm:block text-sm font-bold text-gray-400">
-                    Selecciona una respuesta para continuar (teclas 1-8)
-                </div>
-                <button id="btn-check-answer" onclick="checkAnswer()" disabled class="duo-btn duo-btn-green w-full sm:w-auto sm:min-w-[200px] py-3 sm:py-3.5 px-6 rounded-2xl font-black text-sm sm:text-base uppercase tracking-wider ml-auto">
-                    Comprobar
+            
+            <h3 class="text-base font-extrabold text-white tracking-tight mb-1">Acceso Restringido</h3>
+            <p class="text-xs text-slate-400 mb-5">Introduce la contraseña para entrar a <span class="text-red-400 font-semibold">Botonera</span>:</p>
+            
+            <input type="password" id="project-password-input" onkeydown="if(event.key === 'Enter') verifyProjectPassword()" placeholder="••••••••" 
+                class="w-full px-4 py-2.5 bg-slate-900/90 border border-slate-800 rounded-xl focus:outline-none focus:border-red-500 text-xs text-center text-slate-100 placeholder-slate-600 tracking-widest transition-all mb-3">
+            
+            <p id="password-error" class="hidden text-[11px] text-red-400 font-semibold mb-3 flex items-center justify-center gap-1">
+                <i class="fa-solid fa-circle-exclamation"></i> Contraseña incorrecta
+            </p>
+            
+            <div class="flex items-center gap-2 pt-2">
+                <button onclick="closePasswordModal()" class="flex-1 py-2.5 px-3 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold border border-slate-700/60 transition-all">
+                    Cancelar
                 </button>
-            </div>
-        </div>
-
-        <!-- Panel Deslizante de Feedback -->
-        <div id="feedback-bar" class="fixed bottom-0 left-0 right-0 border-t-2 px-4 pt-3.5 sm:p-6 z-30 feedback-drawer feedback-hidden">
-            <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-                <div class="flex items-start gap-3">
-                    <div id="feedback-icon" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-xl sm:text-2xl shrink-0 bg-white shadow-sm mt-0.5">
-                        <i class="fa-solid fa-check"></i>
-                    </div>
-                    <div>
-                        <h3 id="feedback-title" class="text-base sm:text-xl font-black leading-tight">¡Excelente!</h3>
-                        <p id="feedback-city" class="text-[11px] sm:text-xs font-extrabold uppercase tracking-wide opacity-80 mb-0.5 sm:mb-1"></p>
-                        <p id="feedback-explanation" class="text-xs sm:text-sm font-bold leading-snug max-w-2xl"></p>
-                    </div>
-                </div>
-                <button id="btn-next-question" onclick="nextQuestion()" class="duo-btn w-full sm:w-auto sm:min-w-[180px] py-3 sm:py-3.5 px-6 rounded-2xl font-black text-sm sm:text-base uppercase tracking-wider shrink-0">
-                    Continuar
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <!-- ==================== VISTA 3: PANTALLA DE RESULTADOS ==================== -->
-    <section id="results-view" class="hidden flex-1 flex flex-col items-center justify-center bg-white px-4 py-10 text-center">
-        <div class="max-w-md w-full">
-            <div id="result-badge-icon" class="w-28 h-28 mx-auto mb-5 rounded-full bg-amber-100 text-amber-500 flex items-center justify-center text-6xl shadow-md">
-                <i class="fa-solid fa-trophy"></i>
-            </div>
-
-            <h2 id="result-title" class="text-3xl font-black text-gray-800 mb-2">¡Lección Completada!</h2>
-            <p id="result-subtitle" class="text-gray-500 font-bold mb-6">Has demostrado un gran dominio interpretando climogramas.</p>
-
-            <!-- Tarjetas de Resumen -->
-            <div class="grid grid-cols-3 gap-3 mb-8">
-                <div class="bg-sky-50 border-2 border-sky-200 rounded-2xl p-3">
-                    <div class="text-xs font-extrabold text-sky-600 uppercase mb-1">XP Ganados</div>
-                    <div id="result-xp" class="text-2xl font-black text-sky-700">+50</div>
-                </div>
-                <div class="bg-green-50 border-2 border-green-200 rounded-2xl p-3">
-                    <div class="text-xs font-extrabold text-green-600 uppercase mb-1">Precisión</div>
-                    <div id="result-accuracy" class="text-2xl font-black text-green-700">100%</div>
-                </div>
-                <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-3">
-                    <div class="text-xs font-extrabold text-amber-600 uppercase mb-1">Coronas</div>
-                    <div id="result-crowns" class="text-2xl font-black text-amber-700">+1 <i class="fa-solid fa-crown text-base"></i></div>
-                </div>
-            </div>
-
-            <div class="flex flex-col gap-3">
-                <button onclick="returnToHome()" class="duo-btn duo-btn-green w-full py-4 rounded-2xl font-black text-lg uppercase tracking-wider">
-                    Continuar al Mapa
-                </button>
-                <button id="btn-retry-level" onclick="retryCurrentLevel()" class="duo-btn duo-btn-white w-full py-3 rounded-2xl font-extrabold text-sm uppercase tracking-wider">
-                    Repetir Nivel
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <!-- ==================== MODAL: CHULETA DE LOS 8 BIOCLIMAS ==================== -->
-    <div id="guide-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 backdrop-blur-xs">
-        <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-2xl w-full max-h-[88dvh] flex flex-col overflow-hidden shadow-2xl border-2 border-gray-200">
-            <div class="px-5 py-3.5 border-b border-gray-200 flex items-center justify-between bg-gray-50 shrink-0">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-book-open text-sky-500 text-lg sm:text-xl"></i>
-                    <h3 class="text-base sm:text-lg font-black text-gray-800">Guía de los 8 Bioclimas</h3>
-                </div>
-                <button onclick="closeGuideModal()" class="text-gray-400 hover:text-gray-700 text-xl p-1">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div class="p-4 sm:p-5 overflow-y-auto space-y-2.5 text-sm overscroll-contain" id="guide-content"></div>
-            <div class="p-3.5 sm:p-4 border-t border-gray-200 bg-gray-50 flex justify-end shrink-0 safe-bottom-bar">
-                <button onclick="closeGuideModal()" class="duo-btn duo-btn-blue w-full sm:w-auto px-6 py-2.5 rounded-xl font-extrabold text-sm uppercase">
-                    ¡Entendido!
+                <button onclick="verifyProjectPassword()" class="flex-1 py-2.5 px-3 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-red-600/20 flex items-center justify-center gap-1.5">
+                    Acceder <i class="fa-solid fa-arrow-right text-[10px]"></i>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- ==================== MODAL: CONFIRMACIÓN ==================== -->
-    <div id="confirm-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border-2 border-gray-200">
-            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 text-red-500 flex items-center justify-center text-3xl">
-                <i class="fa-solid fa-triangle-exclamation"></i>
+    <!-- MODAL DE VISTA PREVIA (IFRAME) -->
+    <div id="preview-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-200 p-4">
+        <div class="glass-card w-full max-w-5xl h-[85vh] rounded-2xl flex flex-col shadow-2xl relative overflow-hidden border border-slate-800">
+            <div class="px-5 py-3.5 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                    <h3 id="preview-title" class="text-sm font-bold text-white">Vista Previa</h3>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a id="preview-external-link" href="#" target="_blank" class="px-3 py-1 bg-red-600/20 hover:bg-red-600/30 text-red-300 border border-red-500/30 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Abrir en pestaña
+                    </a>
+                    <button onclick="closePreviewModal()" class="w-7 h-7 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-all">
+                        <i class="fa-solid fa-xmark text-xs"></i>
+                    </button>
+                </div>
             </div>
-            <h3 id="confirm-modal-title" class="text-xl font-black text-gray-800 mb-2">¿Seguro?</h3>
-            <p id="confirm-modal-text" class="text-sm font-bold text-gray-500 mb-6">Perderás el progreso de esta lección.</p>
-            <div class="flex flex-col gap-2.5">
-                <button id="confirm-modal-yes" class="duo-btn duo-btn-red w-full py-3 rounded-2xl font-black uppercase text-sm">
-                    Sí, continuar
-                </button>
-                <button onclick="closeConfirmModal()" class="duo-btn duo-btn-white w-full py-3 rounded-2xl font-extrabold uppercase text-sm">
-                    Cancelar
-                </button>
+            <div class="flex-grow bg-slate-950 relative">
+                <iframe id="preview-iframe" src="" class="w-full h-full border-0"></iframe>
             </div>
         </div>
     </div>
 
     <script>
-        /* ==========================================================================
-           0. MOTOR DE SONIDO SINTETIZADO (WEB AUDIO API)
-           ========================================================================== */
-        let soundEnabled = true;
-        let audioCtx = null;
-
-        function playTone(type) {
-            if (!soundEnabled) return;
-            try {
-                if (!audioCtx) {
-                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    audioCtx = new AudioContext();
-                }
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-
-                const now = audioCtx.currentTime;
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-
-                if (type === 'select') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(520, now);
-                    gain.gain.setValueAtTime(0.06, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
-                    osc.start(now);
-                    osc.stop(now + 0.07);
-                } else if (type === 'tick') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(880, now);
-                    gain.gain.setValueAtTime(0.04, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
-                    osc.start(now);
-                    osc.stop(now + 0.04);
-                } else if (type === 'correct') {
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(523.25, now);
-                    osc.frequency.setValueAtTime(659.25, now + 0.09);
-                    osc.frequency.setValueAtTime(783.99, now + 0.18);
-                    gain.gain.setValueAtTime(0.14, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-                    osc.start(now);
-                    osc.stop(now + 0.35);
-                } else if (type === 'wrong') {
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(220, now);
-                    osc.frequency.linearRampToValueAtTime(155, now + 0.25);
-                    gain.gain.setValueAtTime(0.12, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
-                    osc.start(now);
-                    osc.stop(now + 0.28);
-                } else if (type === 'win') {
-                    [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
-                        const o = audioCtx.createOscillator();
-                        const g = audioCtx.createGain();
-                        o.type = 'triangle';
-                        o.connect(g);
-                        g.connect(audioCtx.destination);
-                        o.frequency.setValueAtTime(freq, now + idx * 0.1);
-                        g.gain.setValueAtTime(0.13, now + idx * 0.1);
-                        g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.3);
-                        o.start(now + idx * 0.1);
-                        o.stop(now + idx * 0.1 + 0.3);
-                    });
-                }
-            } catch (e) {}
-        }
-
-        function toggleSound() {
-            soundEnabled = !soundEnabled;
-            document.getElementById('sound-icon').className = soundEnabled
-                ? 'fa-solid fa-volume-high'
-                : 'fa-solid fa-volume-xmark text-gray-400';
-            if (soundEnabled) playTone('select');
-        }
-
-        /* ==========================================================================
-           1. DEFINICIÓN DE LOS 8 BIOCLIMAS
-           ========================================================================== */
-        const BIOCLIMATES = [
+        // Proyectos configurados[cite: 3]
+        const projects = [
             {
-                id: 'ecuatorial',
-                label: 'Bioclima ecuatorial',
-                shortLabel: 'Ecuatorial',
-                icon: 'fa-tree',
-                color: 'text-emerald-600',
-                bg: 'bg-emerald-50',
-                summary: 'Temperaturas muy cálidas y constantes todo el año (~25-27 °C, amplitud < 3 °C). Lluvias muy abundantes (> 2000 mm) sin estación seca.'
+                id: 1,
+                name: "Tabla Periódica Interactiva",
+                desc: "Tabla periódica completa de 118 elementos con simulador atómico, examen y modo admin.",
+                url: "https://mandarina703.github.io/Tabla-Periodica/",
+                category: "Educación",
+                icon: "fa-flask",
+                color: "from-blue-600 to-indigo-600",
+                favorite: false
             },
             {
-                id: 'tropical',
-                label: 'Bioclima tropical',
-                shortLabel: 'Tropical',
-                icon: 'fa-sun-plant-wilt',
-                color: 'text-amber-600',
-                bg: 'bg-amber-50',
-                summary: 'Temperaturas cálidas todo el año (ningún mes baja de 18 °C). Marcada alternancia entre estación muy lluviosa (verano) y estación seca (invierno).'
+                id: 2,
+                name: "Examen de Geografía",
+                desc: "Evaluación interactiva de conocimientos geográficos con puntuación dinámica.",
+                url: "https://flxnowgames-tech.github.io/EXAMEN-GEOGRAFIA/",
+                category: "Educación",
+                icon: "fa-earth-americas",
+                color: "from-emerald-600 to-teal-600",
+                favorite: false
             },
             {
-                id: 'desertico',
-                label: 'Bioclima desértico',
-                shortLabel: 'Desértico',
-                icon: 'fa-sun',
-                color: 'text-orange-600',
-                bg: 'bg-orange-50',
-                summary: 'Precipitaciones muy escasas (< 250 mm anuales). La curva de temperatura supera las barras de lluvia casi todos los meses (aridez extrema).'
+                id: 3,
+                name: "Demonlist",
+                desc: "Clasificación y listado de niveles extremos de Geometry Dash con estadísticas.",
+                url: "https://flxnowgames-tech.github.io/demonlist/",
+                category: "Gaming",
+                icon: "fa-gamepad",
+                color: "from-purple-600 to-pink-600",
+                favorite: false
             },
             {
-                id: 'polar',
-                label: 'Bioclima polar',
-                shortLabel: 'Polar',
-                icon: 'fa-snowflake',
-                color: 'text-cyan-600',
-                bg: 'bg-cyan-50',
-                summary: 'Inviernos gélidos muy largos y veranos muy cortos donde ningún mes supera los 10 °C. Precipitaciones muy escasas (< 300 mm), en forma de nieve.'
+                id: 4,
+                name: "Pokédex Interactiva",
+                desc: "Enciclopedia Pokémon completa con búsqueda, estadísticas y detalles de criaturas.",
+                url: "https://flxnowgames-tech.github.io/POKEDEX/",
+                category: "Gaming",
+                icon: "fa-bolt",
+                color: "from-amber-500 to-red-600",
+                favorite: false
             },
             {
-                id: 'mediterraneo',
-                label: 'Bioclima mediterráneo',
-                shortLabel: 'Mediterráneo',
-                icon: 'fa-lemon',
-                color: 'text-yellow-600',
-                bg: 'bg-yellow-50',
-                summary: 'Inviernos suaves y veranos calurosos. Su rasgo inconfundible es la SEQUÍA ESTIVAL (la curva roja supera las barras azules en los meses más cálidos).'
+                id: 5,
+                name: "Conversor / Herramienta Binario",
+                desc: "Herramienta interactiva para traducción y conversión de código binario.",
+                url: "https://mandarina703.github.io/Binario/",
+                category: "Herramientas",
+                icon: "fa-code",
+                color: "from-teal-500 to-cyan-600",
+                favorite: false
             },
             {
-                id: 'continental',
-                label: 'Bioclima continental',
-                shortLabel: 'Continental',
-                icon: 'fa-trees',
-                color: 'text-indigo-600',
-                bg: 'bg-indigo-50',
-                summary: 'Gran amplitud térmica anual (> 20 °C): inviernos muy fríos bajo 0 °C y veranos cálidos (> 18 °C). Precipitaciones moderadas concentradas en verano.'
+                id: 6,
+                name: "Matemáticas",
+                desc: "Herramienta creada para repasar los contenidos de los temas de matemáticas.",
+                url: "https://beamish-caramel-6884d7.netlify.app/",
+                category: "Educación",
+                icon: "fa-plus",
+                color: "from-blue-600 to-indigo-600",
+                favorite: false
             },
             {
-                id: 'oceanico',
-                label: 'Bioclima oceánico',
-                shortLabel: 'Oceánico',
-                icon: 'fa-cloud-rain',
-                color: 'text-blue-600',
-                bg: 'bg-blue-50',
-                summary: 'Temperaturas suaves todo el año (amplitud térmica baja, < 15 °C) sin heladas fuertes ni calor extremo. Lluvias abundantes y regulares todos los meses (sin sequía).'
+                id: 7,
+                name: "Faltas de ortografía",
+                desc: "Herramienta creada para corregir faltas de ortografia",
+                url: "https://mandarina703.github.io/Faltas/",
+                category: "Educación",
+                icon: "fa-x",
+                color: "from-blue-600 to-green-600",
+                favorite: false
             },
             {
-                id: 'alta_montana',
-                label: 'Bioclima de alta montaña',
-                shortLabel: 'Alta montaña',
-                icon: 'fa-mountain-sun',
-                color: 'text-violet-600',
-                bg: 'bg-violet-50',
-                summary: 'Temperaturas bajas todo el año por la altitud: varios meses bajo 0 °C en invierno y verano fresco (< 15 °C). Precipitaciones abundantes (> 1000 mm), en nieve en invierno.'
-            }
+                id: 8,
+                name: "Botonera",
+                desc: "Herramienta creada para poner los sonidos que quieras",
+                url: "https://mandarina703.github.io/Botones/",
+                category: "Herramientas",
+                icon: "fa-music",
+                color: "from-purple-600 to-blue-600",
+                favorite: false
+            },
+            {
+                id: 9,
+                name: "Urban Electronics",
+                desc: "Tu lugar de compra tecnológica.",
+                url: "https://flxnowgames-tech.github.io/urbanElectronics/",
+                category: "Gaming",
+                icon: "fa-computer",
+                color: "from-red-500 to-orange-600",
+                favorite: false
+            },
+            {
+                id: 10,
+                name: "Variable Cero",
+                desc: "Tu lugar de compra de servidores, GPUs IA, datasets, modelos IA y mucho más.",
+                url: "https://mandarina703.github.io/Variable-Cero/",
+                category: "Gaming",
+                icon: "fa-server",
+                color: "from-yellow-500 to-blue-600",
+                favorite: false
+            },
+            {
+                id: 11,
+                name: "Climogramas",
+                desc: "Herramienta para estudiar los climogramas.",
+                url: "https://flxnowgames-tech.github.io/climogramas/",
+                category: "Educación",
+                icon: "fa-sun",
+                color: "from-green-500 to-blue-600",
+                favorite: false
+            },
         ];
 
-        /* ==========================================================================
-           2. BASE DE DATOS AMPLIADA DE CLIMOGRAMAS REALES (62 ESTACIONES)
-           ========================================================================== */
-        const CLIMOGRAPHS_DB = [
-            // --- ECUATORIAL ---
-            {
-                id: 'manaos',
-                city: 'Manaos (Brasil)',
-                region: 'Amazonia',
-                difficulty: 1,
-                bioclimate: 'ecuatorial',
-                temps: [26.1, 26.0, 26.1, 26.3, 26.3, 26.4, 26.5, 27.0, 27.5, 27.6, 27.3, 26.7],
-                precips: [260, 288, 314, 300, 256, 114, 88, 58, 83, 126, 183, 217],
-                hint: 'Línea roja casi plana alrededor de 26-27 °C y lluvias torrenciales todo el año.',
-                explanation: 'Temperaturas muy altas y constantes todo el año (amplitud < 2 °C) con precipitaciones abundantes superiores a 2.200 mm: bioclima ecuatorial.'
-            },
-            {
-                id: 'iquitos',
-                city: 'Iquitos (Perú)',
-                region: 'Amazonia Peruana',
-                difficulty: 1,
-                bioclimate: 'ecuatorial',
-                temps: [26.2, 26.1, 26.0, 25.9, 25.6, 25.1, 24.9, 25.6, 26.1, 26.4, 26.4, 26.3],
-                precips: [279, 226, 279, 310, 274, 190, 182, 165, 189, 242, 260, 282],
-                hint: 'Todos los meses superan los 160 mm de lluvia y la temperatura ronda los 26 °C sin variación.',
-                explanation: 'Con más de 2.800 mm de lluvia repartidos en todos los meses y una amplitud térmica de apenas 1,5 °C, es un ejemplo puro de bioclima ecuatorial.'
-            },
-            {
-                id: 'singapur',
-                city: 'Singapur (Sudeste Asiático)',
-                region: 'Malasia / Singapur',
-                difficulty: 2,
-                bioclimate: 'ecuatorial',
-                temps: [26.5, 27.1, 27.5, 28.0, 28.3, 28.3, 27.9, 27.9, 27.6, 27.6, 27.0, 26.4],
-                precips: [234, 112, 170, 155, 171, 130, 154, 148, 156, 154, 258, 318],
-                hint: 'Calor constante (~27,5 °C) en el ecuador con más de 2.100 mm anuales sin estación seca.',
-                explanation: 'Ubicada a 1° de latitud norte, Singapur mantiene temperaturas constantes en torno a 27,5 °C y lluvias abundantes todos los meses: bioclima ecuatorial.'
-            },
-            {
-                id: 'kisangani',
-                city: 'Kisangani (R. D. del Congo)',
-                region: 'Cuenca del Congo',
-                difficulty: 2,
-                bioclimate: 'ecuatorial',
-                temps: [25.4, 25.5, 25.6, 25.4, 25.0, 24.4, 23.8, 24.0, 24.4, 24.7, 24.9, 25.1],
-                precips: [85, 102, 165, 184, 158, 118, 112, 148, 172, 215, 185, 104],
-                hint: 'Doble máximo equinoccial de lluvias (abril y octubre) y temperatura constante de ~25 °C.',
-                explanation: 'En pleno corazón de la cuenca del Congo presenta temperaturas constantes (~25 °C) y dos picos de lluvia en los equinoccios: bioclima ecuatorial.'
-            },
-            {
-                id: 'libreville',
-                city: 'Libreville (Gabón)',
-                region: 'Golfo de Guinea',
-                difficulty: 3,
-                bioclimate: 'ecuatorial',
-                temps: [26.8, 27.0, 27.1, 26.9, 26.6, 25.4, 24.4, 24.6, 25.5, 26.0, 26.2, 26.5],
-                precips: [250, 243, 363, 339, 247, 54, 12, 32, 128, 388, 468, 321],
-                hint: 'Más de 2.800 mm de precipitación anual y temperaturas constantes entre 24,4 °C y 27,1 °C.',
-                explanation: 'Aunque muestra un breve descenso pluviométrico en julio-agosto, su total anual supera los 2.840 mm y su amplitud térmica es mínima (2,7 °C): bioclima ecuatorial.'
-            },
+        let currentFilter = 'all';
+        let pendingAction = null;
 
-            // --- TROPICAL ---
-            {
-                id: 'bombay',
-                city: 'Bombay / Mumbai (India)',
-                region: 'Costa Occidental de India',
-                difficulty: 2,
-                bioclimate: 'tropical',
-                temps: [24.5, 24.8, 26.9, 28.7, 30.2, 29.2, 27.7, 27.3, 27.7, 28.7, 28.0, 26.3],
-                precips: [1, 1, 0, 1, 11, 493, 840, 585, 341, 89, 10, 3],
-                hint: 'Calor todo el año (> 24 °C), invierno totalmente seco y monzón torrencial en verano.',
-                explanation: 'Temperaturas tropicales todo el año con estación seca invernal y lluvias monzónicas torrenciales en verano (> 2.300 mm): bioclima tropical.'
-            },
-            {
-                id: 'bamako',
-                city: 'Bamako (Malí)',
-                region: 'Sahel / África Occidental',
-                difficulty: 2,
-                bioclimate: 'tropical',
-                temps: [25.1, 27.8, 30.2, 31.6, 31.4, 29.1, 26.8, 26.1, 26.6, 27.7, 26.5, 24.8],
-                precips: [1, 0, 4, 20, 56, 129, 231, 291, 198, 67, 4, 0],
-                hint: 'Todos los meses superan los 24 °C, con estación seca de noviembre a abril y lluvias en verano.',
-                explanation: 'Temperaturas muy cálidas todo el año (nunca bajan de 24 °C) con dos estaciones hídricas muy marcadas (seca en invierno y húmeda en verano): bioclima tropical.'
-            },
-            {
-                id: 'bangkok',
-                city: 'Bangkok (Tailandia)',
-                region: 'Indochina',
-                difficulty: 2,
-                bioclimate: 'tropical',
-                temps: [26.5, 28.0, 29.5, 30.5, 29.9, 29.5, 29.0, 28.8, 28.3, 28.1, 27.4, 26.2],
-                precips: [13, 20, 42, 91, 247, 157, 175, 219, 334, 292, 49, 6],
-                hint: 'Ningún mes baja de 26 °C y las lluvias se concentran de mayo a octubre.',
-                explanation: 'Temperaturas cálidas constantes (media de 28,4 °C) con estación seca invernal y lluvias monzónicas estivales (~1.645 mm): bioclima tropical.'
-            },
-            {
-                id: 'kinshasa',
-                city: 'Kinshasa (R. D. del Congo)',
-                region: 'África Central (Hemisferio Sur)',
-                difficulty: 3,
-                bioclimate: 'tropical',
-                temps: [25.9, 26.4, 26.8, 26.9, 26.3, 24.0, 22.5, 23.7, 25.4, 26.2, 26.0, 25.6],
-                precips: [163, 165, 221, 238, 142, 9, 5, 2, 49, 137, 247, 203],
-                hint: 'En el hemisferio sur, la estación seca coincide con su invierno (junio-agosto) y calor todo el año.',
-                explanation: 'Temperaturas cálidas los 12 meses (> 22 °C) con una estación seca bien definida entre junio y agosto (invierno austral): bioclima tropical.'
-            },
-            {
-                id: 'darwin',
-                city: 'Darwin (Norte de Australia)',
-                region: 'Australia Tropical',
-                difficulty: 3,
-                bioclimate: 'tropical',
-                temps: [28.2, 28.1, 28.3, 28.4, 27.3, 25.3, 24.9, 26.0, 27.8, 29.1, 29.3, 28.8],
-                precips: [423, 371, 315, 100, 21, 2, 1, 5, 15, 70, 141, 252],
-                hint: 'Hemisferio sur: lluvias torrenciales de diciembre a marzo y sequía absoluta de junio a agosto.',
-                explanation: 'Clima tropical de sabana austral: calor constante (~27,6 °C) con monzón estival en diciembre-marzo y estación seca en invierno: bioclima tropical.'
-            },
-            {
-                id: 'la_habana',
-                city: 'La Habana (Cuba)',
-                region: 'Caribe',
-                difficulty: 3,
-                bioclimate: 'tropical',
-                temps: [22.2, 22.4, 23.7, 25.0, 26.4, 27.6, 28.1, 28.2, 27.7, 26.4, 24.6, 22.9],
-                precips: [64, 68, 46, 54, 98, 182, 106, 100, 144, 180, 88, 58],
-                hint: 'Todos los meses por encima de 22 °C, con lluvias máximas entre mayo y octubre.',
-                explanation: 'Temperaturas cálidas todo el año (mínima de 22,2 °C) y estación lluviosa marcada en verano-otoño: bioclima tropical.'
-            },
-            {
-                id: 'acapulco',
-                city: 'Acapulco (México)',
-                region: 'Pacífico Mexicano',
-                difficulty: 4,
-                bioclimate: 'tropical',
-                temps: [26.8, 26.9, 27.0, 27.6, 28.5, 28.8, 28.9, 28.9, 28.4, 28.4, 28.0, 27.2],
-                precips: [15, 3, 2, 3, 27, 265, 245, 289, 345, 145, 22, 11],
-                hint: 'Calor permanente (~28 °C) con invierno y primavera muy secos y lluvias intensas de junio a octubre.',
-                explanation: 'Temperaturas megatérmicas todo el año (26,8 °C a 28,9 °C) y contraste extremo entre estación seca invernal y lluvias estivales: bioclima tropical.'
-            },
-
-            // --- DESÉRTICO ---
-            {
-                id: 'el_cairo',
-                city: 'El Cairo (Egipto)',
-                region: 'Norte de África',
-                difficulty: 1,
-                bioclimate: 'desertico',
-                temps: [13.6, 14.9, 17.7, 21.4, 24.9, 27.7, 28.4, 28.2, 26.6, 23.8, 19.3, 15.1],
-                precips: [5, 4, 4, 1, 1, 0, 0, 0, 0, 1, 3, 5],
-                hint: 'Barras azules casi inexistentes todo el año (apenas 24 mm en total).',
-                explanation: 'Con apenas 24 mm de lluvia al año y la línea de temperatura muy por encima de las barras en los 12 meses: bioclima desértico.'
-            },
-            {
-                id: 'riadh',
-                city: 'Riad (Arabia Saudita)',
-                region: 'Península Arábiga',
-                difficulty: 1,
-                bioclimate: 'desertico',
-                temps: [14.4, 16.9, 21.1, 26.9, 32.9, 35.4, 36.8, 36.5, 33.5, 28.2, 21.5, 16.1],
-                precips: [12, 8, 24, 23, 5, 0, 0, 0, 0, 1, 7, 13],
-                hint: 'Veranos extremos de más de 36 °C y precipitación total inferior a 100 mm anuales.',
-                explanation: 'Aridez extrema durante todo el año (93 mm totales) combinada con veranos tórridos de 36,8 °C: bioclima desértico.'
-            },
-            {
-                id: 'phoenix',
-                city: 'Phoenix (Arizona, EE. UU.)',
-                region: 'Desierto de Sonora',
-                difficulty: 2,
-                bioclimate: 'desertico',
-                temps: [13.4, 15.3, 18.4, 22.6, 27.8, 33.4, 35.5, 34.7, 31.6, 24.8, 17.6, 13.1],
-                precips: [23, 23, 25, 7, 3, 1, 27, 25, 16, 15, 17, 23],
-                hint: 'Veranos abrasadores (> 35 °C) y apenas 205 mm de lluvia repartidos en todo el año.',
-                explanation: 'La curva térmica supera ampliamente las barras de precipitación en los 12 meses, con solo 205 mm anuales: bioclima desértico.'
-            },
-            {
-                id: 'alice_springs',
-                city: 'Alice Springs (Centro de Australia)',
-                region: 'Outback Australiano',
-                difficulty: 3,
-                bioclimate: 'desertico',
-                temps: [28.9, 28.1, 25.1, 20.3, 15.3, 12.1, 11.7, 14.4, 18.6, 22.8, 25.8, 27.9],
-                precips: [39, 43, 31, 17, 19, 14, 15, 9, 9, 21, 28, 37],
-                hint: 'Hemisferio sur: meses más cálidos en enero-febrero (~29 °C) y aridez en los 12 meses (~280 mm con alta evaporación).',
-                explanation: 'En el interior árido de Australia, la elevada temperatura media (21 °C) hace que los 282 mm anuales sean insuficientes todos los meses: bioclima desértico.'
-            },
-            {
-                id: 'lima',
-                city: 'Lima (Perú)',
-                region: 'Costa del Pacífico',
-                difficulty: 4,
-                bioclimate: 'desertico',
-                temps: [22.6, 23.2, 22.8, 21.1, 19.1, 17.6, 16.9, 16.6, 16.8, 17.7, 19.3, 21.3],
-                precips: [1, 0, 1, 0, 0, 1, 2, 2, 1, 0, 0, 1],
-                hint: 'Temperaturas muy suaves (16-23 °C) por la corriente fría de Humboldt, pero apenas 9 mm de lluvia al año.',
-                explanation: 'A pesar de tener temperaturas templadas y suaves todo el año por la corriente fría de Humboldt, la precipitación anual es de apenas 9 mm: bioclima desértico costero.'
-            },
-            {
-                id: 'turpan',
-                city: 'Turpán (Xinjiang, China)',
-                region: 'Desierto de Taklamakán',
-                difficulty: 4,
-                bioclimate: 'desertico',
-                temps: [-7.6, -0.5, 9.5, 19.3, 25.9, 31.1, 32.7, 30.8, 24.1, 13.7, 2.5, -5.8],
-                precips: [1, 1, 1, 1, 1, 3, 2, 2, 1, 1, 1, 1],
-                hint: '¡Desierto frío de interior! Inviernos bajo cero, veranos de 32 °C y solo 16 mm de lluvia al año.',
-                explanation: 'Es un desierto continental interior: combina inviernos helados (-7,6 °C) y veranos tórridos (32,7 °C) con una sequedad absoluta de 16 mm anuales: bioclima desértico.'
-            },
-
-            // --- POLAR ---
-            {
-                id: 'barrow',
-                city: 'Utqiaġvik / Barrow (Alaska)',
-                region: 'Ártico Norteamericano',
-                difficulty: 1,
-                bioclimate: 'polar',
-                temps: [-25.2, -26.4, -25.1, -17.9, -6.4, 1.8, 4.7, 3.7, -0.3, -9.2, -18.7, -23.6],
-                precips: [3, 3, 2, 3, 3, 8, 22, 26, 18, 10, 4, 3],
-                hint: 'Temperaturas bajo cero 9 meses, verano < 5 °C y lluvias muy escasas (< 110 mm).',
-                explanation: 'Ningún mes supera los 10 °C, inviernos gélidos de -26 °C y precipitaciones muy escasas (105 mm): bioclima polar.'
-            },
-            {
-                id: 'svalbard',
-                city: 'Longyearbyen (Svalbard, Noruega)',
-                region: 'Océano Ártico',
-                difficulty: 2,
-                bioclimate: 'polar',
-                temps: [-13.0, -13.5, -13.2, -9.8, -3.1, 2.9, 6.5, 5.5, 1.0, -5.2, -9.5, -11.8],
-                precips: [18, 15, 17, 11, 8, 10, 18, 23, 22, 17, 18, 19],
-                hint: '8 meses bajo cero, verano máximo de 6,5 °C y menos de 200 mm de precipitación.',
-                explanation: 'Por encima del Círculo Polar Ártico, ningún mes alcanza los 10 °C y las precipitaciones son muy escasas (196 mm): bioclima polar.'
-            },
-            {
-                id: 'resolute',
-                city: 'Resolute (Nunavut, Canadá)',
-                region: 'Archipiélago Ártico Canadiense',
-                difficulty: 2,
-                bioclimate: 'polar',
-                temps: [-32.0, -32.4, -30.2, -21.8, -10.3, 0.4, 4.5, 2.0, -4.8, -14.9, -23.6, -29.2],
-                precips: [4, 4, 5, 6, 8, 14, 26, 32, 21, 16, 7, 5],
-                hint: 'Mínimas de -32 °C en invierno, verano de apenas 4,5 °C y solo 148 mm de precipitación anual.',
-                explanation: 'Frío extremo durante todo el año (media anual de -15,2 °C) y muy escasa precipitación (148 mm): bioclima polar.'
-            },
-            {
-                id: 'nuuk',
-                city: 'Nuuk (Groenlandia)',
-                region: 'Costa Suroeste de Groenlandia',
-                difficulty: 4,
-                bioclimate: 'polar',
-                temps: [-8.2, -8.5, -8.0, -3.7, 0.6, 4.4, 6.8, 6.3, 3.5, -0.8, -4.1, -6.6],
-                precips: [55, 52, 50, 48, 53, 62, 82, 92, 96, 72, 69, 55],
-                hint: 'Ningún mes alcanza los 10 °C (verano máximo de 6,8 °C), impidiendo el bosque.',
-                explanation: 'Clima polar de tundra oceánica: el mes más cálido apenas llega a 6,8 °C (regla de Köppen: < 10 °C en verano): bioclima polar.'
-            },
-            {
-                id: 'mcmurdo',
-                city: 'Base McMurdo (Antártida)',
-                region: 'Antártida',
-                difficulty: 3,
-                bioclimate: 'polar',
-                temps: [-2.9, -9.5, -18.2, -20.7, -21.7, -23.0, -25.7, -26.1, -24.6, -18.9, -9.7, -3.4],
-                precips: [15, 21, 24, 18, 24, 25, 16, 14, 12, 15, 12, 16],
-                hint: '¡Los 12 meses bajo cero! En el hemisferio sur, enero es el mes menos frío (-2,9 °C).',
-                explanation: 'En la Antártida ningún mes supera los 0 °C (hielo perpetuo) y las precipitaciones en nieve son muy escasas (212 mm): bioclima polar.'
-            },
-
-            // --- MEDITERRÁNEO ---
-            {
-                id: 'sevilla',
-                city: 'Sevilla (España)',
-                region: 'Valle del Guadalquivir',
-                difficulty: 1,
-                bioclimate: 'mediterraneo',
-                temps: [10.9, 12.5, 15.6, 17.3, 20.7, 25.1, 28.2, 27.9, 25.0, 20.2, 15.1, 11.9],
-                precips: [66, 50, 36, 54, 31, 10, 2, 5, 27, 68, 91, 99],
-                hint: 'En junio, julio y agosto la línea roja queda muy por encima de las barras azules.',
-                explanation: 'Inviernos suaves (11 °C), veranos calurosos (28 °C) y una marcada sequía estival de junio a septiembre: bioclima mediterráneo.'
-            },
-            {
-                id: 'roma',
-                city: 'Roma (Italia)',
-                region: 'Península Itálica',
-                difficulty: 1,
-                bioclimate: 'mediterraneo',
-                temps: [7.5, 8.2, 10.2, 12.6, 17.2, 21.1, 24.1, 24.5, 20.8, 16.4, 11.4, 8.4],
-                precips: [67, 73, 58, 81, 53, 34, 19, 37, 73, 113, 115, 81],
-                hint: 'Máximo de lluvias en otoño y mínimo claro en verano con temperaturas cálidas.',
-                explanation: 'Inviernos templados y húmedos, lluvias otoñales y verano seco donde la temperatura supera la precipitación: bioclima mediterráneo.'
-            },
-            {
-                id: 'atenas',
-                city: 'Atenas (Grecia)',
-                region: 'Mediterráneo Oriental',
-                difficulty: 2,
-                bioclimate: 'mediterraneo',
-                temps: [10.2, 10.8, 13.1, 16.7, 21.8, 26.6, 29.3, 29.2, 25.0, 19.9, 15.4, 11.7],
-                precips: [55, 46, 45, 31, 21, 12, 9, 7, 19, 43, 62, 65],
-                hint: 'Verano muy seco y caluroso (~29 °C) e invierno suave y moderadamente lluvioso.',
-                explanation: 'Fuerte sequía estival de mayo a septiembre y lluvias concentradas en otoño e invierno con temperaturas suaves: bioclima mediterráneo.'
-            },
-            {
-                id: 'san_francisco',
-                city: 'San Francisco (California, EE. UU.)',
-                region: 'Costa Oeste de Norteamérica',
-                difficulty: 2,
-                bioclimate: 'mediterraneo',
-                temps: [10.7, 12.2, 13.1, 13.9, 14.9, 16.3, 16.8, 17.4, 17.9, 16.7, 13.5, 10.8],
-                precips: [114, 113, 83, 37, 18, 4, 0, 2, 5, 28, 80, 116],
-                hint: 'Veranos sin una gota de lluvia (julio-agosto 0-2 mm) e inviernos suaves y lluviosos.',
-                explanation: 'Aunque la corriente fría de California suaviza el verano, presenta la típica sequía estival absoluta y lluvias invernales: bioclima mediterráneo.'
-            },
-            {
-                id: 'santiago_chile',
-                city: 'Santiago de Chile (Chile)',
-                region: 'Valle Central (Hemisferio Sur)',
-                difficulty: 3,
-                bioclimate: 'mediterraneo',
-                temps: [20.9, 19.9, 17.6, 14.2, 11.1, 8.5, 8.1, 9.5, 11.5, 14.5, 17.3, 19.9],
-                precips: [1, 1, 3, 10, 42, 70, 86, 51, 22, 13, 9, 2],
-                hint: 'Hemisferio sur: los meses más cálidos son enero-febrero, y justo ahí está la sequía.',
-                explanation: 'En el hemisferio sur el verano ocurre entre diciembre y marzo coincidiendo con la sequía estival, mientras el invierno es suave y lluvioso: bioclima mediterráneo.'
-            },
-            {
-                id: 'ciudad_del_cabo',
-                city: 'Ciudad del Cabo (Sudáfrica)',
-                region: 'Extremo Sur de África',
-                difficulty: 3,
-                bioclimate: 'mediterraneo',
-                temps: [20.9, 21.0, 19.8, 17.4, 14.9, 13.1, 12.4, 12.8, 14.1, 16.1, 18.3, 19.9],
-                precips: [15, 17, 20, 41, 69, 93, 82, 77, 40, 30, 14, 17],
-                hint: 'Hemisferio sur: lluvias máximas en junio-agosto y verano seco de diciembre a marzo.',
-                explanation: 'Con estaciones invertidas por su latitud austral, muestra verano cálido y seco e invierno templado y húmedo: bioclima mediterráneo.'
-            },
-            {
-                id: 'perth',
-                city: 'Perth (Suroeste de Australia)',
-                region: 'Australia Occidental',
-                difficulty: 4,
-                bioclimate: 'mediterraneo',
-                temps: [24.6, 24.9, 23.1, 19.6, 16.3, 14.0, 13.1, 13.6, 14.9, 17.1, 20.2, 22.8],
-                precips: [16, 13, 20, 37, 91, 135, 152, 124, 83, 44, 23, 12],
-                hint: 'Hemisferio sur: julio es el mes más lluvioso (152 mm) y enero-febrero son secos y calurosos (~25 °C).',
-                explanation: 'Invertido respecto al Mediterráneo europeo: verano austral seco y caluroso frente a invierno suave y muy lluvioso: bioclima mediterráneo.'
-            },
-
-            // --- OCEÁNICO ---
-            {
-                id: 'londres',
-                city: 'Londres (Reino Unido)',
-                region: 'Europa Atlántica',
-                difficulty: 1,
-                bioclimate: 'oceanico',
-                temps: [5.2, 5.3, 7.6, 9.9, 13.3, 16.5, 18.7, 18.5, 15.7, 12.0, 8.0, 5.5],
-                precips: [55, 41, 42, 44, 49, 45, 45, 50, 49, 69, 59, 55],
-                hint: 'Lluvias repartidas todo el año y temperaturas suaves sin meses bajo cero.',
-                explanation: 'Amplitud térmica moderada (13,5 °C), inviernos frescos sin heladas fuertes (5,2 °C), veranos suaves y lluvias constantes los 12 meses: bioclima oceánico.'
-            },
-            {
-                id: 'santander',
-                city: 'Santander (España)',
-                region: 'Cornisa Cantábrica',
-                difficulty: 1,
-                bioclimate: 'oceanico',
-                temps: [9.7, 9.8, 11.3, 12.4, 15.1, 17.8, 19.8, 20.3, 18.8, 16.1, 12.6, 10.5],
-                precips: [106, 92, 88, 102, 78, 58, 52, 73, 83, 120, 137, 124],
-                hint: 'Total anual superior a 1.100 mm, ningún mes con sequía y temperaturas muy suaves.',
-                explanation: 'Precipitaciones abundantes todo el año (1.113 mm) sin aridez estival y temperaturas muy suavizadas por el mar: bioclima oceánico.'
-            },
-            {
-                id: 'vancouver',
-                city: 'Vancouver (Canadá)',
-                region: 'Costa Pacífica Canadiense',
-                difficulty: 2,
-                bioclimate: 'oceanico',
-                temps: [4.1, 5.4, 7.4, 10.0, 13.2, 15.9, 18.2, 18.3, 15.2, 10.6, 6.4, 3.9],
-                precips: [168, 104, 114, 88, 65, 54, 36, 37, 51, 121, 189, 162],
-                hint: 'Más de 1.180 mm de lluvia, sin meses bajo cero y veranos suaves (~18 °C).',
-                explanation: 'La corriente cálida del Pacífico modera los inviernos (3,9 °C) y mantiene lluvias abundantes casi todo el año: bioclima oceánico.'
-            },
-            {
-                id: 'bergen',
-                city: 'Bergen (Noruega)',
-                region: 'Costa de los Fiordos',
-                difficulty: 2,
-                bioclimate: 'oceanico',
-                temps: [2.2, 2.1, 3.8, 6.9, 11.1, 13.8, 15.6, 15.3, 12.1, 8.6, 5.1, 2.7],
-                precips: [215, 168, 182, 128, 114, 136, 158, 198, 265, 274, 252, 240],
-                hint: 'Más de 2.300 mm de lluvia al año, pero ningún mes baja de 0 °C gracias a la Corriente del Golfo.',
-                explanation: 'Pese a su latitud norte, la Corriente del Golfo evita meses bajo cero (mínima de 2,1 °C) y aporta lluvias muy abundantes todo el año: bioclima oceánico.'
-            },
-            {
-                id: 'wellington',
-                city: 'Wellington (Nueva Zelanda)',
-                region: 'Pacífico Sur',
-                difficulty: 3,
-                bioclimate: 'oceanico',
-                temps: [16.9, 17.2, 15.8, 13.7, 11.7, 9.7, 8.9, 9.4, 10.8, 12.0, 13.5, 15.4],
-                precips: [72, 62, 92, 100, 117, 147, 136, 123, 100, 115, 99, 86],
-                hint: 'Hemisferio sur, amplitud térmica muy suave (8,3 °C) y lluvias abundantes los 12 meses.',
-                explanation: 'Temperaturas oceánicas muy suaves todo el año (entre 8,9 °C y 17,2 °C) y lluvias regulares superiores a 1.200 mm sin sequía: bioclima oceánico.'
-            },
-            {
-                id: 'puerto_montt',
-                city: 'Puerto Montt (Sur de Chile)',
-                region: 'Patagonia Norte Húmeda',
-                difficulty: 3,
-                bioclimate: 'oceanico',
-                temps: [14.6, 14.3, 12.8, 10.7, 8.9, 7.1, 6.6, 7.2, 8.3, 10.1, 11.9, 13.6],
-                precips: [98, 92, 128, 154, 212, 224, 218, 195, 142, 128, 114, 105],
-                hint: 'Hemisferio sur, amplitud térmica de solo 8 °C y más de 1.800 mm de lluvia anual.',
-                explanation: 'Los vientos húmedos del Pacífico mantienen temperaturas suaves todo el año (6,6 °C a 14,6 °C) y lluvias muy abundantes: bioclima oceánico.'
-            },
-            {
-                id: 'reikiavik',
-                city: 'Reikiavik (Islandia)',
-                region: 'Atlántico Norte Subártico',
-                difficulty: 4,
-                bioclimate: 'oceanico',
-                temps: [0.3, 0.4, 0.9, 3.3, 6.7, 9.6, 11.2, 10.6, 7.9, 4.5, 1.8, 0.4],
-                precips: [85, 81, 78, 56, 48, 44, 52, 64, 72, 82, 84, 88],
-                hint: '¡Atención! Verano supera los 10 °C (11,2 °C) e invierno no baja de 0 °C gracias al mar.',
-                explanation: 'Clima oceánico subpolar: al superar los 10 °C en verano (11,2 °C) no es polar, y al no bajar de 0 °C en invierno tampoco es continental: bioclima oceánico.'
-            },
-
-            // --- CONTINENTAL ---
-            {
-                id: 'moscu',
-                city: 'Moscú (Rusia)',
-                region: 'Llanura Europea Oriental',
-                difficulty: 1,
-                bioclimate: 'continental',
-                temps: [-6.5, -6.7, -1.0, 6.7, 13.2, 17.0, 19.2, 17.0, 11.3, 5.6, -1.2, -5.2],
-                precips: [52, 41, 35, 37, 49, 80, 85, 82, 68, 71, 55, 52],
-                hint: 'Gran contraste: enero (-6,7 °C) frente a julio (+19,2 °C) y máximo de lluvias en verano.',
-                explanation: 'Gran amplitud térmica anual (25,9 °C) con inviernos largos bajo cero y máximo de lluvias en verano: bioclima continental.'
-            },
-            {
-                id: 'varsovia',
-                city: 'Varsovia (Polonia)',
-                region: 'Europa Central',
-                difficulty: 2,
-                bioclimate: 'continental',
-                temps: [-1.8, -0.6, 3.2, 8.9, 14.3, 17.6, 19.7, 19.1, 14.0, 8.7, 3.6, -0.4],
-                precips: [29, 27, 31, 37, 56, 71, 78, 64, 48, 37, 38, 34],
-                hint: 'Invierno bajo cero, verano cálido (~20 °C) y pico claro de lluvias en junio-agosto.',
-                explanation: 'Amplitud térmica superior a 21 °C con inviernos fríos y lluvias concentradas en verano: bioclima continental.'
-            },
-            {
-                id: 'chicago',
-                city: 'Chicago (Illinois, EE. UU.)',
-                region: 'Grandes Lagos',
-                difficulty: 2,
-                bioclimate: 'continental',
-                temps: [-4.6, -2.4, 3.3, 9.6, 15.6, 21.2, 23.8, 22.9, 18.6, 11.8, 4.7, -2.1],
-                precips: [44, 45, 64, 86, 94, 98, 94, 108, 82, 74, 78, 57],
-                hint: 'Amplitud térmica de más de 28 °C: invierno bajo cero (-4,6 °C) y verano caluroso (23,8 °C).',
-                explanation: 'Fuerte contraste térmico estacional (28,4 °C de amplitud) con inviernos helados y veranos cálidos y húmedos: bioclima continental.'
-            },
-            {
-                id: 'pekin',
-                city: 'Pekín (China)',
-                region: 'Norte de China',
-                difficulty: 3,
-                bioclimate: 'continental',
-                temps: [-3.1, 0.3, 6.7, 14.8, 20.8, 25.0, 26.7, 25.5, 20.6, 13.4, 4.8, -1.2],
-                precips: [3, 5, 9, 22, 38, 78, 185, 160, 48, 23, 9, 3],
-                hint: 'Invierno seco bajo cero (-3,1 °C) y verano muy cálido (26,7 °C) con lluvias concentradas en julio-agosto.',
-                explanation: 'Clima continental monzónico: gran amplitud térmica (29,8 °C), invierno frío y seco frente a verano cálido y muy lluvioso: bioclima continental.'
-            },
-            {
-                id: 'yakutsk',
-                city: 'Yakutsk (Siberia, Rusia)',
-                region: 'Siberia Oriental',
-                difficulty: 3,
-                bioclimate: 'continental',
-                temps: [-38.6, -33.8, -20.1, -4.8, 7.5, 16.4, 19.5, 15.2, 6.1, -7.8, -27.0, -37.6],
-                precips: [9, 8, 7, 8, 20, 35, 39, 37, 31, 18, 16, 10],
-                hint: '¡Récord de amplitud térmica (58 °C)! Invierno de -38 °C pero verano cálido de +19,5 °C.',
-                explanation: 'Aunque su invierno es extremo, su verano sube hasta +19,5 °C (muy por encima de los 10 °C del clima polar), generando la mayor amplitud térmica del planeta: bioclima continental.'
-            },
-            {
-                id: 'toronto',
-                city: 'Toronto (Canadá)',
-                region: 'Este de Norteamérica',
-                difficulty: 4,
-                bioclimate: 'continental',
-                temps: [-4.2, -3.2, 1.3, 7.6, 14.2, 19.2, 22.2, 21.3, 17.0, 10.6, 4.8, -0.9],
-                precips: [61, 55, 53, 68, 82, 71, 74, 81, 85, 64, 84, 61],
-                hint: 'Inviernos bajo cero y veranos cálidos (> 22 °C) con amplitud térmica superior a 26 °C.',
-                explanation: 'Clima continental húmedo: aunque tiene precipitaciones regulares todo el año, su elevada amplitud térmica (26,4 °C) e inviernos bajo cero lo distinguen del oceánico: bioclima continental.'
-            },
-            {
-                id: 'ulan_bator',
-                city: 'Ulán Bator (Mongolia)',
-                region: 'Asia Central',
-                difficulty: 4,
-                bioclimate: 'continental',
-                temps: [-21.6, -16.6, -7.4, 2.0, 10.1, 15.7, 18.2, 16.0, 9.6, 0.5, -11.9, -19.0],
-                precips: [2, 3, 4, 10, 21, 46, 73, 63, 31, 10, 6, 4],
-                hint: 'Invierno gélido (-21 °C), pero el verano sube hasta +18,2 °C (amplitud de 40 °C).',
-                explanation: 'Invierno muy frío y seco seguido de un verano cálido (+18,2 °C) que concentra casi todas las precipitaciones del año: bioclima continental.'
-            },
-
-            // --- ALTA MONTAÑA ---
-            {
-                id: 'chamonix',
-                city: 'Chamonix-Mont-Blanc (Alpes, Francia - 1.035 m)',
-                region: 'Alpes Franceses',
-                difficulty: 1,
-                bioclimate: 'alta_montana',
-                temps: [-2.1, -0.8, 3.2, 7.1, 11.4, 14.5, 16.6, 16.1, 12.6, 8.1, 2.5, -1.2],
-                precips: [115, 102, 98, 95, 118, 134, 138, 142, 112, 116, 118, 124],
-                hint: 'Invierno bajo cero (-2 °C), verano fresco (~16 °C) y lluvias muy abundantes (> 1.400 mm).',
-                explanation: 'Inviernos fríos bajo cero con nevadas, veranos frescos por la altitud y precipitaciones muy abundantes todo el año (1.412 mm): bioclima de alta montaña.'
-            },
-            {
-                id: 'benasque',
-                city: 'Benasque / Pirineos (España - 1.138 m)',
-                region: 'Pirineo Aragonés',
-                difficulty: 2,
-                bioclimate: 'alta_montana',
-                temps: [0.4, 1.5, 4.6, 6.8, 10.9, 15.1, 18.1, 17.7, 14.1, 9.4, 4.1, 1.0],
-                precips: [92, 78, 84, 112, 128, 105, 76, 84, 96, 118, 124, 108],
-                hint: 'Temperatura media anual baja (8,6 °C), inviernos cerca de 0 °C y más de 1.200 mm sin sequía estival.',
-                explanation: 'El descenso térmico por la altitud y unas precipitaciones elevadas todo el año (1.205 mm) sin aridez estival lo definen como bioclima de alta montaña.'
-            },
-            {
-                id: 'davos',
-                city: 'Davos (Alpes Suizos - 1.594 m)',
-                region: 'Alpes Suizos',
-                difficulty: 2,
-                bioclimate: 'alta_montana',
-                temps: [-4.9, -4.1, -0.7, 3.1, 8.0, 11.2, 13.2, 12.7, 9.3, 5.2, -0.6, -3.9],
-                precips: [68, 56, 62, 65, 92, 124, 138, 145, 98, 72, 74, 70],
-                hint: 'Inviernos bajo cero, verano fresco (máx. 13,2 °C) y > 1.000 mm de precipitación anual.',
-                explanation: 'A casi 1.600 m de altitud, las temperaturas son frías (5 meses bajo cero y verano fresco de 13,2 °C) con precipitaciones abundantes (1.064 mm): bioclima de alta montaña.'
-            },
-            {
-                id: 'navacerrada',
-                city: 'Puerto de Navacerrada (España - 1.894 m)',
-                region: 'Sistema Central',
-                difficulty: 3,
-                bioclimate: 'alta_montana',
-                temps: [-0.6, -0.2, 2.0, 3.5, 7.6, 13.1, 17.0, 16.8, 12.6, 7.3, 2.6, 0.3],
-                precips: [138, 118, 105, 132, 124, 65, 28, 31, 68, 152, 185, 168],
-                hint: 'A casi 1.900 m de altitud: más de 1.300 mm de precipitación anual e inviernos bajo cero.',
-                explanation: 'La altitud provoca inviernos fríos con abundantes nevadas y un total anual de 1.314 mm de precipitación: bioclima de alta montaña.'
-            },
-            {
-                id: 'candanchu',
-                city: 'Candanchú / Sallent (Pirineos - 1.560 m)',
-                region: 'Pirineo Occidental',
-                difficulty: 3,
-                bioclimate: 'alta_montana',
-                temps: [-1.8, -1.2, 1.4, 3.8, 8.2, 12.4, 15.2, 14.9, 11.6, 7.1, 1.9, -1.1],
-                precips: [165, 148, 152, 175, 168, 115, 82, 88, 124, 178, 192, 180],
-                hint: 'Más de 1.700 mm de precipitación anual, 3 meses bajo cero y verano fresco (~15 °C).',
-                explanation: 'Precipitaciones hiperhúmedas (1.767 mm, gran parte en nieve invernal), temperaturas medias bajas (5,7 °C) y verano fresco: bioclima de alta montaña.'
-            },
-            {
-                id: 'zugspitze',
-                city: 'Zugspitze (Alpes Bávaros - 2.962 m)',
-                region: 'Alta Cumbre Alpina',
-                difficulty: 4,
-                bioclimate: 'alta_montana',
-                temps: [-11.2, -11.4, -9.8, -6.9, -2.1, 1.1, 3.2, 3.3, 0.8, -2.8, -7.5, -10.3],
-                precips: [178, 155, 188, 172, 165, 192, 205, 198, 142, 125, 156, 174],
-                hint: '¡Ojo al total de lluvia! Temperaturas de alta cumbre pero con más de 2.000 mm de precipitación anual.',
-                explanation: 'A casi 3.000 m de altitud las temperaturas son muy bajas todo el año, pero a diferencia del clima polar (muy seco), recibe más de 2.050 mm de precipitación anual: bioclima de alta montaña.'
-            },
-            {
-                id: 'la_paz',
-                city: 'La Paz / El Alto (Bolivia - 4.058 m)',
-                region: 'Altiplano Andino',
-                difficulty: 4,
-                bioclimate: 'alta_montana',
-                temps: [9.2, 9.1, 9.0, 8.5, 7.2, 5.8, 5.6, 6.7, 7.9, 9.2, 9.9, 9.6],
-                precips: [132, 108, 76, 34, 13, 5, 7, 14, 31, 41, 54, 98],
-                hint: '¡Alta montaña tropical a más de 4.000 m! Temperaturas frías todo el año (5-10 °C) con muy poca amplitud.',
-                explanation: 'A más de 4.000 metros en los Andes, la latitud tropical mantiene la temperatura constante, pero la altitud la desploma a 5-10 °C todo el año: bioclima de alta montaña.'
-            }
-        ];
-
-        /* ==========================================================================
-           3. CONFIGURACIÓN DE LOS 20 NIVELES PROGRESIVOS EN 4 BLOQUES
-           ========================================================================== */
-        const BLOCKS_INFO = {
-            1: {
-                title: 'Bloque 1 · Fundamentos del Clima',
-                subtitle: 'Domina los patrones esenciales de temperatura y lluvia',
-                badgeColor: 'bg-emerald-100 text-emerald-700 border-emerald-200'
-            },
-            2: {
-                title: 'Bloque 2 · Contrastes del Mundo',
-                subtitle: 'Explora continentes, monzones y alta montaña',
-                badgeColor: 'bg-sky-100 text-sky-700 border-sky-200'
-            },
-            3: {
-                title: 'Bloque 3 · Hemisferio Sur y Matices',
-                subtitle: 'Estaciones invertidas, retos rápidos y lectura pura',
-                badgeColor: 'bg-purple-100 text-purple-700 border-purple-200'
-            },
-            4: {
-                title: 'Bloque 4 · Maestría y Casos Extremos',
-                subtitle: 'Anomalías térmicas, cumbres y examen final',
-                badgeColor: 'bg-amber-100 text-amber-800 border-amber-200'
-            }
+        window.onload = function() {
+            renderProjects();
+            updateStats();
         };
 
-        const LEVELS_CONFIG = [
-            // --- BLOQUE 1: FUNDAMENTOS (Niveles 1-5) ---
-            {
-                id: 1, block: 1,
-                title: 'Primeros Pasos',
-                subtitle: 'Climas extremos fáciles de distinguir',
-                icon: 'fa-seedling', color: '#58cc02', shadow: '#46a302',
-                mode: 'standard', showHints: true, questionsCount: 4,
-                stationIds: ['manaos', 'el_cairo', 'barrow', 'chamonix']
-            },
-            {
-                id: 2, block: 1,
-                title: 'El Mediterráneo',
-                subtitle: 'Identifica la sequía estival',
-                icon: 'fa-lemon', color: '#58cc02', shadow: '#46a302',
-                mode: 'standard', showHints: true, questionsCount: 4,
-                stationIds: ['sevilla', 'roma', 'manaos', 'el_cairo']
-            },
-            {
-                id: 3, block: 1,
-                title: 'Brisa Atlántica',
-                subtitle: 'Lluvias constantes y temperaturas suaves',
-                icon: 'fa-cloud-rain', color: '#58cc02', shadow: '#46a302',
-                mode: 'standard', showHints: true, questionsCount: 4,
-                stationIds: ['londres', 'santander', 'sevilla', 'barrow']
-            },
-            {
-                id: 4, block: 1,
-                title: 'Interior y Cumbres',
-                subtitle: 'Diferencia Continental y Alta Montaña',
-                icon: 'fa-mountain-sun', color: '#58cc02', shadow: '#46a302',
-                mode: 'standard', showHints: true, questionsCount: 4,
-                stationIds: ['moscu', 'chamonix', 'benasque', 'londres']
-            },
-            {
-                id: 5, block: 1,
-                title: 'Repaso Bloque 1',
-                subtitle: 'Mezcla de estaciones fundamentales',
-                icon: 'fa-shield-halved', color: '#46a302', shadow: '#357a01',
-                mode: 'standard', showHints: false, questionsCount: 5,
-                stationIds: ['iquitos', 'riadh', 'roma', 'santander', 'moscu']
-            },
+        function renderProjects() {
+            const grid = document.getElementById('projects-grid');
+            const searchVal = document.getElementById('search-input').value.toLowerCase();
+            grid.innerHTML = '';
 
-            // --- BLOQUE 2: CONTRASTES DEL MUNDO (Niveles 6-10) ---
-            {
-                id: 6, block: 2,
-                title: 'El Monzón Tropical',
-                subtitle: 'Calor todo el año con estación seca y húmeda',
-                icon: 'fa-sun-plant-wilt', color: '#1cb0f6', shadow: '#1899d6',
-                mode: 'standard', showHints: true, questionsCount: 4,
-                stationIds: ['bombay', 'bamako', 'singapur', 'riadh']
-            },
-            {
-                id: 7, block: 2,
-                title: 'Norteamérica',
-                subtitle: 'De California a los Grandes Lagos y Canadá',
-                icon: 'fa-compass', color: '#1cb0f6', shadow: '#1899d6',
-                mode: 'standard', showHints: true, questionsCount: 4,
-                stationIds: ['san_francisco', 'vancouver', 'chicago', 'phoenix']
-            },
-            {
-                id: 8, block: 2,
-                title: 'Europa de Extremo a Extremo',
-                subtitle: 'Fiordos, Alpes y llanuras centrales',
-                icon: 'fa-map-location-dot', color: '#1cb0f6', shadow: '#1899d6',
-                mode: 'standard', showHints: false, questionsCount: 5,
-                stationIds: ['atenas', 'bergen', 'varsovia', 'davos', 'svalbard']
-            },
-            {
-                id: 9, block: 2,
-                title: 'Gigantes de Asia',
-                subtitle: 'Del sudeste asiático a Siberia',
-                icon: 'fa-globe-asia', color: '#1cb0f6', shadow: '#1899d6',
-                mode: 'standard', showHints: false, questionsCount: 5,
-                stationIds: ['bangkok', 'pekin', 'yakutsk', 'singapur', 'riadh']
-            },
-            {
-                id: 10, block: 2,
-                title: 'Lectura Pura I',
-                subtitle: 'Sin resumen numérico: solo la gráfica',
-                icon: 'fa-eye-slash', color: '#0284c7', shadow: '#0369a1',
-                mode: 'blind', showHints: false, questionsCount: 5,
-                stationIds: ['iquitos', 'sevilla', 'moscu', 'davos', 'resolute']
-            },
+            const filtered = projects.filter(p => {
+                const matchesCat = currentFilter === 'all' || p.category === currentFilter;
+                const matchesSearch = p.name.toLowerCase().includes(searchVal) || p.desc.toLowerCase().includes(searchVal);
+                return matchesCat && matchesSearch;
+            });
 
-            // --- BLOQUE 3: HEMISFERIO SUR Y MATICES (Niveles 11-15) ---
-            {
-                id: 11, block: 3,
-                title: 'Hemisferio Sur I',
-                subtitle: '¡Ojo! El verano es en diciembre-febrero',
-                icon: 'fa-earth-oceania', color: '#ce82ff', shadow: '#a55eea',
-                mode: 'standard', showHints: true, questionsCount: 4,
-                stationIds: ['santiago_chile', 'wellington', 'kinshasa', 'alice_springs']
-            },
-            {
-                id: 12, block: 3,
-                title: 'Hemisferio Sur II',
-                subtitle: 'Australia, Sudáfrica, Patagonia y Antártida',
-                icon: 'fa-snowflake', color: '#ce82ff', shadow: '#a55eea',
-                mode: 'standard', showHints: false, questionsCount: 5,
-                stationIds: ['ciudad_del_cabo', 'perth', 'darwin', 'puerto_montt', 'mcmurdo']
-            },
-            {
-                id: 13, block: 3,
-                title: 'Alta Montaña Ibérica',
-                subtitle: 'Pirineos y Sistema Central frente al entorno',
-                icon: 'fa-mountain', color: '#ce82ff', shadow: '#a55eea',
-                mode: 'standard', showHints: false, questionsCount: 5,
-                stationIds: ['navacerrada', 'candanchu', 'benasque', 'santander', 'sevilla']
-            },
-            {
-                id: 14, block: 3,
-                title: 'Detective Climático I',
-                subtitle: 'Identifica la estación meteorológica real',
-                icon: 'fa-magnifying-glass-location', color: '#ce82ff', shadow: '#a55eea',
-                mode: 'detective', showHints: false, questionsCount: 4,
-                stationIds: ['manaos', 'sevilla', 'moscu', 'el_cairo']
-            },
-            {
-                id: 15, block: 3,
-                title: 'Contrarreloj Climático',
-                subtitle: '25 segundos por climograma',
-                icon: 'fa-stopwatch', color: '#9333ea', shadow: '#7e22ce',
-                mode: 'timed', timeLimit: 25, showHints: false, questionsCount: 5,
-                stationIds: ['bombay', 'londres', 'santiago_chile', 'chamonix', 'barrow']
-            },
-
-            // --- BLOQUE 4: MAESTRÍA Y CASOS EXTREMOS (Niveles 16-20) ---
-            {
-                id: 16, block: 4,
-                title: 'Anomalías Térmicas',
-                subtitle: 'Desiertos fríos, costeros y tundra húmeda',
-                icon: 'fa-temperature-arrow-down', color: '#ff9600', shadow: '#cc7800',
-                mode: 'standard', showHints: true, questionsCount: 5,
-                stationIds: ['lima', 'turpan', 'nuuk', 'reikiavik', 'toronto']
-            },
-            {
-                id: 17, block: 4,
-                title: 'Techos del Mundo',
-                subtitle: 'De los Alpes bávaros al Altiplano andino',
-                icon: 'fa-icicles', color: '#ff9600', shadow: '#cc7800',
-                mode: 'standard', showHints: false, questionsCount: 5,
-                stationIds: ['zugspitze', 'la_paz', 'candanchu', 'ulan_bator', 'nuuk']
-            },
-            {
-                id: 18, block: 4,
-                title: 'Lectura Pura II',
-                subtitle: 'Casos avanzados sin datos numéricos',
-                icon: 'fa-eye-slash', color: '#ff9600', shadow: '#cc7800',
-                mode: 'blind', showHints: false, questionsCount: 5,
-                stationIds: ['perth', 'reikiavik', 'toronto', 'zugspitze', 'lima']
-            },
-            {
-                id: 19, block: 4,
-                title: 'Detective Climático II',
-                subtitle: 'Adivina ciudades clave de todo el planeta',
-                icon: 'fa-user-secret', color: '#ff9600', shadow: '#cc7800',
-                mode: 'detective', showHints: false, questionsCount: 5,
-                stationIds: ['bombay', 'santiago_chile', 'nuuk', 'la_paz', 'yakutsk']
-            },
-            {
-                id: 20, block: 4,
-                title: 'Examen Final Gran Maestro',
-                subtitle: '6 climogramas variados para coronar el mapa',
-                icon: 'fa-crown', color: '#ea580c', shadow: '#c2410c',
-                mode: 'final', showHints: false, questionsCount: 6,
-                stationIds: ['libreville', 'acapulco', 'turpan', 'reikiavik', 'zugspitze', 'ciudad_del_cabo']
-            }
-        ];
-
-        /* ==========================================================================
-           4. ESTADO GLOBAL Y PERSISTENCIA
-           ========================================================================== */
-        const STORAGE_KEY = 'climaquest_save_v2_20lvl';
-
-        let userState = {
-            xp: 0,
-            bestStreak: 0,
-            unlockedLevel: 1,
-            crowns: {} // { 1: 3, 2: 2, ... }
-        };
-
-        let quizState = {
-            levelId: 1,
-            questions: [],
-            currentIndex: 0,
-            hearts: 3,
-            streak: 0,
-            correctCount: 0,
-            selectedOption: null,
-            answered: false,
-            timerInterval: null,
-            timeLeft: 25,
-            currentOptions: [] // Puede ser los 8 bioclimas o 4 ciudades en modo detective
-        };
-
-        function loadState() {
-            try {
-                const raw = localStorage.getItem(STORAGE_KEY);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    userState = { ...userState, ...parsed };
-                }
-            } catch (e) {}
-        }
-
-        function saveState() {
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(userState));
-            } catch (e) {}
-        }
-
-        /* ==========================================================================
-           5. RENDERIZADO DEL MAPA DE 20 NIVELES POR BLOQUES
-           ========================================================================== */
-        function renderHome() {
-            document.getElementById('stat-streak').textContent = userState.bestStreak;
-            document.getElementById('stat-xp').textContent = `${userState.xp} XP`;
-            const totalCrowns = Object.values(userState.crowns).reduce((a, b) => a + b, 0);
-            document.getElementById('stat-crowns').textContent = `${totalCrowns}/${LEVELS_CONFIG.length * 3}`;
-
-            const container = document.getElementById('levels-container');
-            container.innerHTML = '';
-
-            const offsets = ['translate-x-0', '-translate-x-9 sm:-translate-x-14', 'translate-x-9 sm:translate-x-14', 'translate-x-0'];
-            let currentBlock = 0;
-
-            LEVELS_CONFIG.forEach((lvl, idx) => {
-                // Cabecera de Bloque Temático cuando cambia el bloque
-                if (lvl.block !== currentBlock) {
-                    currentBlock = lvl.block;
-                    const blockMeta = BLOCKS_INFO[currentBlock];
-                    const blockHeader = document.createElement('div');
-                    blockHeader.className = 'w-full pt-2 pb-1';
-                    blockHeader.innerHTML = `
-                        <div class="rounded-2xl border-2 px-4 py-3 ${blockMeta.badgeColor} shadow-xs flex items-center justify-between gap-2">
-                            <div>
-                                <div class="font-black text-sm sm:text-base leading-tight">${blockMeta.title}</div>
-                                <div class="text-[11px] sm:text-xs font-bold opacity-85 mt-0.5">${blockMeta.subtitle}</div>
-                            </div>
-                            <span class="text-xs font-black px-2.5 py-1 rounded-xl bg-white/70 shrink-0">
-                                Niveles ${(currentBlock - 1) * 5 + 1}–${currentBlock * 5}
-                            </span>
-                        </div>
-                    `;
-                    container.appendChild(blockHeader);
-                }
-
-                const isUnlocked = lvl.id <= userState.unlockedLevel;
-                const isCurrent = lvl.id === userState.unlockedLevel;
-                const crownsEarned = userState.crowns[lvl.id] || 0;
-
-                const wrapper = document.createElement('div');
-                wrapper.className = `flex flex-col items-center relative ${offsets[idx % offsets.length]}`;
-                if (isCurrent) wrapper.id = 'current-level-node';
-
-                const mainBlock = document.createElement('div');
-                mainBlock.className = 'flex flex-col items-center';
-
-                // Etiqueta flotante en el nivel activo
-                if (isCurrent) {
-                    const badge = document.createElement('div');
-                    badge.className = 'mb-2 bg-white border-2 border-gray-200 text-[#58cc02] font-black text-xs uppercase tracking-wider px-3 py-1 rounded-xl shadow-sm animate-float';
-                    badge.innerHTML = '¡Jugar ahora! <i class="fa-solid fa-caret-down ml-1"></i>';
-                    mainBlock.appendChild(badge);
-                }
-
-                // Etiqueta de modo especial si aplica
-                const modeLabels = {
-                    blind: { text: 'Lectura Pura', cls: 'bg-sky-100 text-sky-700 border-sky-200' },
-                    detective: { text: 'Detective', cls: 'bg-purple-100 text-purple-700 border-purple-200' },
-                    timed: { text: 'Contrarreloj', cls: 'bg-amber-100 text-amber-800 border-amber-200' },
-                    final: { text: 'Examen Final', cls: 'bg-orange-100 text-orange-800 border-orange-200' }
-                };
-
-                // Nodo circular
-                const nodeBtn = document.createElement('button');
-                if (isUnlocked) {
-                    nodeBtn.className = 'level-node level-node-unlocked text-white text-2xl sm:text-3xl';
-                    nodeBtn.style.backgroundColor = lvl.color;
-                    nodeBtn.style.setProperty('--shadow-color', lvl.shadow);
-                    nodeBtn.onclick = () => startLevel(lvl.id);
-                    nodeBtn.innerHTML = `<i class="fa-solid ${lvl.icon}"></i>`;
-                } else {
-                    nodeBtn.className = 'level-node level-node-locked text-2xl';
-                    nodeBtn.disabled = true;
-                    nodeBtn.innerHTML = `<i class="fa-solid fa-lock"></i>`;
-                }
-                mainBlock.appendChild(nodeBtn);
-
-                // Coronas
-                const starsDiv = document.createElement('div');
-                starsDiv.className = 'flex items-center gap-1 mt-2';
-                for (let s = 1; s <= 3; s++) {
-                    const active = s <= crownsEarned;
-                    starsDiv.innerHTML += `<i class="fa-solid fa-crown text-xs sm:text-sm ${active ? 'text-amber-400' : 'text-gray-300'}"></i>`;
-                }
-                mainBlock.appendChild(starsDiv);
-
-                // Título y subtítulo
-                const infoDiv = document.createElement('div');
-                infoDiv.className = 'text-center mt-1 max-w-[230px]';
-                const specialTag = modeLabels[lvl.mode]
-                    ? `<span class="inline-block text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded-md border ${modeLabels[lvl.mode].cls} mb-0.5">${modeLabels[lvl.mode].text}</span>`
-                    : '';
-
-                infoDiv.innerHTML = `
-                    ${specialTag}
-                    <div class="font-black text-sm sm:text-base leading-tight ${isUnlocked ? 'text-gray-800' : 'text-gray-400'}">
-                        ${lvl.id}. ${lvl.title}
-                    </div>
-                    <div class="text-[11px] sm:text-xs font-bold leading-snug ${isUnlocked ? 'text-gray-500' : 'text-gray-400'}">
-                        ${lvl.subtitle}
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-12 text-center text-slate-500 text-xs italic">
+                        No se encontraron proyectos con los filtros actuales.
                     </div>
                 `;
-                mainBlock.appendChild(infoDiv);
-                wrapper.appendChild(mainBlock);
-
-                // Conector al siguiente nivel dentro del mismo bloque
-                const nextLvl = LEVELS_CONFIG[idx + 1];
-                if (nextLvl && nextLvl.block === lvl.block) {
-                    const connector = document.createElement('div');
-                    connector.className = `w-2 h-7 mt-2.5 rounded-full ${lvl.id < userState.unlockedLevel ? 'bg-[#58cc02]' : 'bg-gray-200'}`;
-                    wrapper.appendChild(connector);
-                }
-
-                container.appendChild(wrapper);
-            });
-        }
-
-        function scrollToCurrentLevel() {
-            const el = document.getElementById('current-level-node');
-            if (el) {
-                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        }
-
-        /* ==========================================================================
-           6. RENDERIZADO DE CLIMOGRAMAS EN SVG (ESCALA DE GAUSSEN 1°C = 2mm)
-           ========================================================================== */
-        function renderClimographSVG(data, hideMetrics = false) {
-            const months = ['E', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
-            const temps = data.temps;
-            const precips = data.precips;
-
-            const tma = (temps.reduce((a, b) => a + b, 0) / 12).toFixed(1);
-            const ptot = precips.reduce((a, b) => a + b, 0);
-            const tMax = Math.max(...temps);
-            const tMin = Math.min(...temps);
-            const amp = (tMax - tMin).toFixed(1);
-
-            const metricsRow = document.getElementById('chart-metrics-row');
-            const blindBanner = document.getElementById('chart-blind-banner');
-
-            if (hideMetrics) {
-                metricsRow.classList.add('hidden');
-                blindBanner.classList.remove('hidden');
-            } else {
-                metricsRow.classList.remove('hidden');
-                blindBanner.classList.add('hidden');
-                document.getElementById('chart-tma').textContent = tma.replace('.', ',');
-                document.getElementById('chart-ptot').textContent = ptot.toLocaleString('es-ES');
-                document.getElementById('chart-amp').textContent = amp.replace('.', ',');
-            }
-
-            const W = 560;
-            const H = 265;
-            const padLeft = 46;
-            const padRight = 50;
-            const padTop = 18;
-            const padBottom = 30;
-            const plotW = W - padLeft - padRight;
-            const plotH = H - padTop - padBottom;
-
-            const minTempNeeded = Math.min(0, Math.floor(tMin / 10) * 10);
-            const maxPrecipData = Math.max(...precips, 60);
-            const maxTempData = Math.max(...temps, 30);
-
-            const rawMaxTempAxis = Math.max(maxTempData + 5, Math.ceil(maxPrecipData / 2 / 10) * 10);
-            const maxTempAxis = Math.min(Math.max(rawMaxTempAxis, 40), 120);
-            const maxPrecipAxis = maxTempAxis * 2;
-            const minPrecipAxis = minTempNeeded * 2;
-            const totalTempSpan = maxTempAxis - minTempNeeded;
-
-            const tempToY = (t) => padTop + ((maxTempAxis - t) / totalTempSpan) * plotH;
-            const precipToY = (p) => {
-                const clampedP = Math.min(p, maxPrecipAxis);
-                return padTop + ((maxPrecipAxis - clampedP) / (maxPrecipAxis - minPrecipAxis)) * plotH;
-            };
-            const zeroY = tempToY(0);
-
-            let svg = `<svg viewBox="0 0 ${W} ${H}" class="w-full h-auto select-none" xmlns="http://www.w3.org/2000/svg">`;
-            svg += `<rect x="${padLeft}" y="${padTop}" width="${plotW}" height="${plotH}" fill="#fafafa" rx="4"/>`;
-
-            const stepT = totalTempSpan > 70 ? 20 : 10;
-            for (let t = minTempNeeded; t <= maxTempAxis; t += stepT) {
-                const y = tempToY(t);
-                const isZero = t === 0;
-                svg += `<line x1="${padLeft}" y1="${y}" x2="${padLeft + plotW}" y2="${y}" 
-                        stroke="${isZero ? '#94a3b8' : '#e2e8f0'}" 
-                        stroke-width="${isZero ? '1.8' : '1'}" 
-                        stroke-dasharray="${isZero ? '' : '3,3'}"/>`;
-
-                svg += `<text x="${padLeft - 8}" y="${y + 4}" text-anchor="end" font-size="11" font-weight="800" fill="#dc2626">${t}°</text>`;
-
-                if (t >= 0) {
-                    svg += `<text x="${padLeft + plotW + 8}" y="${y + 4}" text-anchor="start" font-size="11" font-weight="800" fill="#2563eb">${t * 2}</text>`;
-                }
-            }
-
-            svg += `<text x="14" y="${padTop + plotH / 2}" transform="rotate(-90, 14, ${padTop + plotH / 2})" text-anchor="middle" font-size="11" font-weight="900" fill="#dc2626">Temp (°C)</text>`;
-            svg += `<text x="${W - 10}" y="${padTop + plotH / 2}" transform="rotate(90, ${W - 10}, ${padTop + plotH / 2})" text-anchor="middle" font-size="11" font-weight="900" fill="#2563eb">Precip (mm)</text>`;
-
-            const colW = plotW / 12;
-
-            months.forEach((m, i) => {
-                const xCenter = padLeft + colW * i + colW / 2;
-                const barW = colW * 0.64;
-                const barX = xCenter - barW / 2;
-                const pVal = precips[i];
-                const barTopY = precipToY(pVal);
-                const barHeight = Math.max(0, zeroY - barTopY);
-
-                if (barHeight > 0) {
-                    svg += `<rect x="${barX}" y="${barTopY}" width="${barW}" height="${barHeight}" fill="#3b82f6" fill-opacity="0.82" rx="2"/>`;
-                }
-
-                if (pVal > maxPrecipAxis) {
-                    svg += `<text x="${xCenter}" y="${padTop - 5}" text-anchor="middle" font-size="9.5" font-weight="900" fill="#1d4ed8">${pVal}</text>`;
-                }
-
-                if (i > 0) {
-                    svg += `<line x1="${padLeft + colW * i}" y1="${padTop}" x2="${padLeft + colW * i}" y2="${padTop + plotH}" stroke="#f1f5f9" stroke-width="1"/>`;
-                }
-
-                svg += `<text x="${xCenter}" y="${H - 10}" text-anchor="middle" font-size="12" font-weight="800" fill="#475569">${m}</text>`;
-            });
-
-            let polylinePoints = [];
-            temps.forEach((t, i) => {
-                const xCenter = padLeft + colW * i + colW / 2;
-                const y = tempToY(t);
-                polylinePoints.push(`${xCenter},${y}`);
-            });
-
-            svg += `<polyline points="${polylinePoints.join(' ')}" fill="none" stroke="#ef4444" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>`;
-
-            temps.forEach((t, i) => {
-                const xCenter = padLeft + colW * i + colW / 2;
-                const y = tempToY(t);
-                svg += `<circle cx="${xCenter}" cy="${y}" r="4.2" fill="#ef4444" stroke="#ffffff" stroke-width="1.5"/>`;
-            });
-
-            svg += `<rect x="${padLeft}" y="${padTop}" width="${plotW}" height="${plotH}" fill="none" stroke="#cbd5e1" stroke-width="1.5" rx="4"/>`;
-            svg += `</svg>`;
-
-            document.getElementById('climograph-svg-container').innerHTML = svg;
-        }
-
-        /* ==========================================================================
-           7. LÓGICA DE PARTIDA Y MODOS VARIADOS
-           ========================================================================== */
-        function shuffleArray(arr) {
-            const copy = [...arr];
-            for (let i = copy.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [copy[i], copy[j]] = [copy[j], copy[i]];
-            }
-            return copy;
-        }
-
-        function clearQuestionTimer() {
-            if (quizState.timerInterval) {
-                clearInterval(quizState.timerInterval);
-                quizState.timerInterval = null;
-            }
-        }
-
-        function startQuestionTimer(seconds) {
-            clearQuestionTimer();
-            const timerBadge = document.getElementById('quiz-timer-badge');
-            const timerText = document.getElementById('quiz-timer-text');
-
-            quizState.timeLeft = seconds;
-            timerBadge.classList.remove('hidden', 'bg-red-100', 'border-red-300', 'text-red-700');
-            timerBadge.classList.add('bg-amber-100', 'border-amber-300', 'text-amber-800');
-            timerText.textContent = `${quizState.timeLeft}s`;
-
-            quizState.timerInterval = setInterval(() => {
-                if (quizState.answered) {
-                    clearQuestionTimer();
-                    return;
-                }
-                quizState.timeLeft--;
-                timerText.textContent = `${quizState.timeLeft}s`;
-
-                if (quizState.timeLeft <= 6 && quizState.timeLeft > 0) {
-                    timerBadge.classList.remove('bg-amber-100', 'border-amber-300', 'text-amber-800');
-                    timerBadge.classList.add('bg-red-100', 'border-red-300', 'text-red-700');
-                    playTone('tick');
-                }
-
-                if (quizState.timeLeft <= 0) {
-                    clearQuestionTimer();
-                    handleTimeOut();
-                }
-            }, 1000);
-        }
-
-        function handleTimeOut() {
-            if (quizState.answered) return;
-            quizState.selectedOption = '__TIMEOUT__';
-            checkAnswer(true);
-        }
-
-        function startLevel(levelId) {
-            const config = LEVELS_CONFIG.find(l => l.id === levelId);
-            if (!config) return;
-
-            clearQuestionTimer();
-
-            // Obtener estaciones configuradas para este nivel y barajarlas
-            let pool = config.stationIds
-                .map(id => CLIMOGRAPHS_DB.find(c => c.id === id))
-                .filter(Boolean);
-
-            const selectedQuestions = shuffleArray(pool).slice(0, config.questionsCount);
-
-            quizState = {
-                levelId: levelId,
-                questions: selectedQuestions,
-                currentIndex: 0,
-                hearts: 3,
-                streak: 0,
-                correctCount: 0,
-                selectedOption: null,
-                answered: false,
-                timerInterval: null,
-                timeLeft: config.timeLimit || 25,
-                currentOptions: []
-            };
-
-            document.getElementById('home-header').classList.add('hidden');
-            document.getElementById('home-view').classList.add('hidden');
-            document.getElementById('results-view').classList.add('hidden');
-            document.getElementById('quiz-view').classList.remove('hidden');
-
-            renderQuestion();
-        }
-
-        function buildOptionsForQuestion(config, q) {
-            if (config.mode === 'detective') {
-                // En modo Detective: 4 ciudades reales de distintos bioclimas
-                const distractors = shuffleArray(
-                    CLIMOGRAPHS_DB.filter(c => c.id !== q.id && c.bioclimate !== q.bioclimate)
-                ).slice(0, 3);
-
-                const choices = shuffleArray([q, ...distractors]).map(st => ({
-                    id: st.id,
-                    label: st.city,
-                    shortLabel: st.city.split('(')[0].trim(),
-                    icon: 'fa-location-dot',
-                    color: 'text-purple-600',
-                    bg: 'bg-purple-50',
-                    isCorrect: st.id === q.id
-                }));
-                return choices;
-            } else {
-                // Modo estándar / lectura pura / contrarreloj / examen final: los 8 bioclimas
-                return BIOCLIMATES.map(bio => ({
-                    id: bio.id,
-                    label: bio.label,
-                    shortLabel: bio.shortLabel,
-                    icon: bio.icon,
-                    color: bio.color,
-                    bg: bio.bg,
-                    isCorrect: bio.id === q.bioclimate
-                }));
-            }
-        }
-
-        function renderQuestion() {
-            const config = LEVELS_CONFIG.find(l => l.id === quizState.levelId);
-            const q = quizState.questions[quizState.currentIndex];
-
-            quizState.selectedOption = null;
-            quizState.answered = false;
-            clearQuestionTimer();
-
-            // Progreso y vidas
-            const progressPct = (quizState.currentIndex / quizState.questions.length) * 100;
-            document.getElementById('quiz-progress-bar').style.width = `${progressPct}%`;
-            document.getElementById('quiz-hearts-count').textContent = quizState.hearts;
-
-            // Racha en vivo
-            const streakBadge = document.getElementById('quiz-streak-badge');
-            if (quizState.streak >= 2) {
-                streakBadge.classList.remove('hidden');
-                document.getElementById('quiz-streak-count').textContent = `${quizState.streak} seguidos`;
-            } else {
-                streakBadge.classList.add('hidden');
-            }
-
-            // Etiquetas de nivel y modo
-            document.getElementById('quiz-level-tag').textContent = `Nivel ${config.id} · ${quizState.currentIndex + 1}/${quizState.questions.length}`;
-
-            const modeBadge = document.getElementById('quiz-mode-badge');
-            const titleDesktop = document.getElementById('quiz-question-title-desktop');
-            const titleMobile = document.getElementById('quiz-question-title-mobile');
-            const timerBadge = document.getElementById('quiz-timer-badge');
-
-            timerBadge.classList.add('hidden');
-
-            if (config.mode === 'detective') {
-                modeBadge.classList.remove('hidden');
-                modeBadge.innerHTML = '<i class="fa-solid fa-user-secret"></i> Modo Detective';
-                titleDesktop.textContent = '¿A qué ciudad pertenece este climograma?';
-                titleMobile.textContent = '¿De qué ciudad es este climograma?';
-            } else if (config.mode === 'blind') {
-                modeBadge.classList.remove('hidden');
-                modeBadge.innerHTML = '<i class="fa-solid fa-eye-slash"></i> Lectura Pura';
-                titleDesktop.textContent = 'Interpreta la gráfica sin datos resumen:';
-                titleMobile.textContent = '¿Qué bioclima muestra la gráfica?';
-            } else if (config.mode === 'timed') {
-                modeBadge.classList.remove('hidden');
-                modeBadge.innerHTML = '<i class="fa-solid fa-stopwatch"></i> Contrarreloj';
-                titleDesktop.textContent = '¡Rápido! ¿A qué bioclima pertenece?';
-                titleMobile.textContent = '¡Rápido! ¿Qué bioclima es?';
-                startQuestionTimer(config.timeLimit || 25);
-            } else if (config.mode === 'final') {
-                modeBadge.classList.remove('hidden');
-                modeBadge.innerHTML = '<i class="fa-solid fa-crown"></i> Examen Final';
-                titleDesktop.textContent = '¿A qué bioclima pertenece este climograma?';
-                titleMobile.textContent = '¿Qué bioclima muestra este climograma?';
-            } else {
-                modeBadge.classList.add('hidden');
-                titleDesktop.textContent = '¿A qué bioclima pertenece este climograma?';
-                titleMobile.textContent = '¿Qué bioclima muestra este climograma?';
-            }
-
-            // Pista
-            const hintPill = document.getElementById('quiz-hint-pill');
-            if (config.showHints && q.hint) {
-                hintPill.classList.remove('hidden');
-                document.getElementById('quiz-hint-text').textContent = q.hint;
-            } else {
-                hintPill.classList.add('hidden');
-            }
-
-            // Renderizar Climograma SVG
-            renderClimographSVG(q, config.mode === 'blind');
-
-            // Renderizar opciones
-            quizState.currentOptions = buildOptionsForQuestion(config, q);
-            const optionsContainer = document.getElementById('options-container');
-            optionsContainer.innerHTML = '';
-
-            // En modo detective (4 opciones), usamos 1 columna en móvil para leer bien nombres de ciudades
-            optionsContainer.className = config.mode === 'detective'
-                ? 'lg:col-span-5 grid grid-cols-1 gap-2'
-                : 'lg:col-span-5 grid grid-cols-2 lg:grid-cols-1 gap-2';
-
-            quizState.currentOptions.forEach((opt, index) => {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.id = `opt-btn-${opt.id}`;
-                btn.className = 'duo-btn duo-btn-white w-full min-h-[46px] px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center justify-between text-left transition';
-                btn.onclick = () => selectOption(opt.id);
-
-                btn.innerHTML = `
-                    <div class="flex items-center gap-2 sm:gap-3 min-w-0">
-                        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl ${opt.bg} ${opt.color} flex items-center justify-center text-xs sm:text-sm shrink-0">
-                            <i class="fa-solid ${opt.icon}"></i>
-                        </div>
-                        <span class="font-extrabold text-xs sm:text-[15px] leading-tight">
-                            ${config.mode === 'detective'
-                                ? `<span>${opt.label}</span>`
-                                : `<span class="sm:hidden">${opt.shortLabel}</span><span class="hidden sm:inline">${opt.label}</span>`
-                            }
-                        </span>
-                    </div>
-                    <span class="hidden sm:flex w-6 h-6 rounded-lg border-2 border-gray-200 text-gray-400 text-xs font-extrabold items-center justify-center shrink-0">
-                        ${index + 1}
-                    </span>
-                `;
-                optionsContainer.appendChild(btn);
-            });
-
-            // Resetear barras inferiores
-            const checkBtn = document.getElementById('btn-check-answer');
-            checkBtn.disabled = true;
-            document.getElementById('check-bar').classList.remove('hidden');
-
-            const fbBar = document.getElementById('feedback-bar');
-            fbBar.classList.remove('feedback-visible');
-            fbBar.classList.add('feedback-hidden');
-        }
-
-        function selectOption(optionId) {
-            if (quizState.answered) return;
-            quizState.selectedOption = optionId;
-            playTone('select');
-
-            quizState.currentOptions.forEach(opt => {
-                const btn = document.getElementById(`opt-btn-${opt.id}`);
-                if (btn) {
-                    btn.classList.toggle('option-selected', opt.id === optionId);
-                }
-            });
-
-            document.getElementById('btn-check-answer').disabled = false;
-        }
-
-        function checkAnswer(timedOut = false) {
-            if (!quizState.selectedOption || quizState.answered) return;
-            quizState.answered = true;
-            clearQuestionTimer();
-
-            const config = LEVELS_CONFIG.find(l => l.id === quizState.levelId);
-            const q = quizState.questions[quizState.currentIndex];
-            const selectedObj = quizState.currentOptions.find(o => o.id === quizState.selectedOption);
-            const correctObj = quizState.currentOptions.find(o => o.isCorrect);
-            const isCorrect = !timedOut && selectedObj && selectedObj.isCorrect;
-
-            const bioMeta = BIOCLIMATES.find(b => b.id === q.bioclimate);
-
-            // Marcar botones
-            quizState.currentOptions.forEach(opt => {
-                const btn = document.getElementById(`opt-btn-${opt.id}`);
-                if (!btn) return;
-                btn.disabled = true;
-                btn.classList.remove('option-selected');
-
-                if (opt.isCorrect) {
-                    btn.classList.add('option-correct');
-                } else if (opt.id === quizState.selectedOption && !isCorrect) {
-                    btn.classList.add('option-wrong');
-                }
-            });
-
-            // Mostrar métricas reales si estábamos en modo Lectura Pura
-            if (config.mode === 'blind') {
-                renderClimographSVG(q, false);
-            }
-
-            // Configurar panel de feedback
-            const fbBar = document.getElementById('feedback-bar');
-            const fbIcon = document.getElementById('feedback-icon');
-            const fbTitle = document.getElementById('feedback-title');
-            const fbCity = document.getElementById('feedback-city');
-            const fbExplanation = document.getElementById('feedback-explanation');
-            const nextBtn = document.getElementById('btn-next-question');
-
-            fbCity.textContent = `Estación: ${q.city} · ${bioMeta.label}`;
-            fbExplanation.textContent = q.explanation;
-
-            if (isCorrect) {
-                playTone('correct');
-                quizState.correctCount++;
-                quizState.streak++;
-                if (quizState.streak > userState.bestStreak) {
-                    userState.bestStreak = quizState.streak;
-                }
-
-                fbBar.className = 'fixed bottom-0 left-0 right-0 border-t-2 border-[#b8f28b] bg-[#d7ffb8] text-[#46a302] px-4 pt-3.5 sm:p-6 z-30 feedback-drawer feedback-visible';
-                fbIcon.className = 'w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-xl sm:text-2xl shrink-0 bg-white text-[#58cc02] shadow-sm mt-0.5';
-                fbIcon.innerHTML = '<i class="fa-solid fa-check"></i>';
-
-                const praises = ['¡Excelente lectura!', '¡Clavado!', '¡Dominio total!', '¡Impecable!', '¡Bien visto!'];
-                fbTitle.textContent = praises[Math.floor(Math.random() * praises.length)];
-                nextBtn.className = 'duo-btn duo-btn-green w-full sm:w-auto sm:min-w-[180px] py-3 sm:py-3.5 px-6 rounded-2xl font-black text-sm sm:text-base uppercase tracking-wider shrink-0';
-            } else {
-                playTone('wrong');
-                quizState.streak = 0;
-                quizState.hearts = Math.max(0, quizState.hearts - 1);
-                document.getElementById('quiz-hearts-count').textContent = quizState.hearts;
-
-                const heartsContainer = document.getElementById('quiz-hearts-container');
-                heartsContainer.classList.add('animate-shake');
-                setTimeout(() => heartsContainer.classList.remove('animate-shake'), 450);
-
-                fbBar.className = 'fixed bottom-0 left-0 right-0 border-t-2 border-[#ffc1c1] bg-[#ffdfe0] text-[#ea2b2b] px-4 pt-3.5 sm:p-6 z-30 feedback-drawer feedback-visible';
-                fbIcon.className = 'w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-xl sm:text-2xl shrink-0 bg-white text-[#ff4b4b] shadow-sm mt-0.5';
-                fbIcon.innerHTML = timedOut ? '<i class="fa-solid fa-stopwatch"></i>' : '<i class="fa-solid fa-xmark"></i>';
-                fbTitle.textContent = timedOut
-                    ? `¡Tiempo agotado! Era: ${correctObj.label}`
-                    : `Correcto: ${correctObj.label}`;
-
-                nextBtn.className = 'duo-btn duo-btn-red w-full sm:w-auto sm:min-w-[180px] py-3 sm:py-3.5 px-6 rounded-2xl font-black text-sm sm:text-base uppercase tracking-wider shrink-0';
-            }
-
-            const progressPct = ((quizState.currentIndex + 1) / quizState.questions.length) * 100;
-            document.getElementById('quiz-progress-bar').style.width = `${progressPct}%`;
-
-            if (quizState.hearts === 0) {
-                nextBtn.textContent = 'Ver Resultado';
-            } else if (quizState.currentIndex === quizState.questions.length - 1) {
-                nextBtn.textContent = 'Finalizar';
-            } else {
-                nextBtn.textContent = 'Continuar';
-            }
-
-            document.getElementById('check-bar').classList.add('hidden');
-        }
-
-        function nextQuestion() {
-            if (quizState.hearts === 0) {
-                finishLesson(false);
                 return;
             }
 
-            if (quizState.currentIndex + 1 < quizState.questions.length) {
-                quizState.currentIndex++;
-                renderQuestion();
-            } else {
-                finishLesson(true);
-            }
-        }
+            filtered.forEach(p => {
+                const card = document.createElement('div');
+                card.className = "project-card glass-card rounded-2xl p-5 flex flex-col justify-between border border-slate-800/80 relative overflow-hidden";
+                
+                let previewAction = `openPreview('${p.url}', '${p.name.replace(/'/g, "\\'")}')`;
+                let visitAction = `href="${p.url}" target="_blank"`;
 
-        function finishLesson(passed) {
-            clearQuestionTimer();
-            document.getElementById('quiz-view').classList.add('hidden');
-            document.getElementById('results-view').classList.remove('hidden');
-
-            const totalQ = quizState.questions.length;
-            const accuracy = Math.round((quizState.correctCount / totalQ) * 100);
-            const badgeIcon = document.getElementById('result-badge-icon');
-            const title = document.getElementById('result-title');
-            const subtitle = document.getElementById('result-subtitle');
-
-            if (passed) {
-                playTone('win');
-                const earnedXp = quizState.correctCount * 15 + (quizState.hearts * 10) + (quizState.levelId * 2);
-                userState.xp += earnedXp;
-
-                const earnedCrowns = quizState.hearts;
-                const prevCrowns = userState.crowns[quizState.levelId] || 0;
-                if (earnedCrowns > prevCrowns) {
-                    userState.crowns[quizState.levelId] = earnedCrowns;
+                if (p.name === "Botonera") {
+                    previewAction = `checkPasswordAndExecute(() => openPreview('${p.url}', '${p.name.replace(/'/g, "\\'")}'))`;
+                    visitAction = `onclick="event.preventDefault(); checkPasswordAndExecute(() => window.open('${p.url}', '_blank'))" href="#"`;
                 }
 
-                let unlockedNew = false;
-                if (quizState.levelId === userState.unlockedLevel && userState.unlockedLevel < LEVELS_CONFIG.length) {
-                    userState.unlockedLevel++;
-                    unlockedNew = true;
-                }
-
-                saveState();
-
-                badgeIcon.className = 'w-28 h-28 mx-auto mb-5 rounded-full bg-amber-100 text-amber-500 flex items-center justify-center text-6xl shadow-md';
-                badgeIcon.innerHTML = '<i class="fa-solid fa-trophy"></i>';
-
-                if (quizState.levelId === LEVELS_CONFIG.length) {
-                    title.textContent = '¡Has Completado los 20 Niveles!';
-                    subtitle.textContent = 'Eres oficialmente un Gran Maestro de la Climatología.';
-                } else {
-                    title.textContent = unlockedNew ? `¡Nivel ${userState.unlockedLevel} Desbloqueado!` : '¡Nivel Completado!';
-                    subtitle.textContent = unlockedNew
-                        ? 'Has superado el reto y abierto el siguiente nivel del mapa.'
-                        : '¡Gran trabajo! Sigue practicando para lograr las 3 coronas.';
-                }
-
-                document.getElementById('result-xp').textContent = `+${earnedXp}`;
-                document.getElementById('result-accuracy').textContent = `${accuracy}%`;
-                document.getElementById('result-crowns').innerHTML = `${earnedCrowns}/3 <i class="fa-solid fa-crown text-base"></i>`;
-
-                if (typeof confetti === 'function') {
-                    confetti({ particleCount: 95, spread: 75, origin: { y: 0.6 } });
-                }
-            } else {
-                const partialXp = quizState.correctCount * 5;
-                userState.xp += partialXp;
-                saveState();
-
-                badgeIcon.className = 'w-28 h-28 mx-auto mb-5 rounded-full bg-red-100 text-red-500 flex items-center justify-center text-6xl shadow-md';
-                badgeIcon.innerHTML = '<i class="fa-solid fa-heart-crack"></i>';
-                title.textContent = '¡Te quedaste sin vidas!';
-                subtitle.textContent = 'Repasa la chuleta de bioclimas e inténtalo de nuevo.';
-
-                document.getElementById('result-xp').textContent = `+${partialXp}`;
-                document.getElementById('result-accuracy').textContent = `${accuracy}%`;
-                document.getElementById('result-crowns').innerHTML = `0/3 <i class="fa-solid fa-crown text-base"></i>`;
-            }
-        }
-
-        function retryCurrentLevel() {
-            startLevel(quizState.levelId);
-        }
-
-        function returnToHome() {
-            clearQuestionTimer();
-            document.getElementById('quiz-view').classList.add('hidden');
-            document.getElementById('results-view').classList.add('hidden');
-            document.getElementById('home-header').classList.remove('hidden');
-            document.getElementById('home-view').classList.remove('hidden');
-            renderHome();
-        }
-
-        /* ==========================================================================
-           8. MODALES Y ATAJOS DE TECLADO
-           ========================================================================== */
-        function openGuideModal() {
-            const content = document.getElementById('guide-content');
-            content.innerHTML = BIOCLIMATES.map(bio => `
-                <div class="p-3.5 rounded-2xl border-2 border-gray-100 bg-white flex items-start gap-3.5">
-                    <div class="w-10 h-10 rounded-xl ${bio.bg} ${bio.color} flex items-center justify-center text-lg shrink-0 mt-0.5">
-                        <i class="fa-solid ${bio.icon}"></i>
-                    </div>
+                card.innerHTML = `
                     <div>
-                        <h4 class="font-black text-gray-800 text-base">${bio.label}</h4>
-                        <p class="text-xs sm:text-sm font-semibold text-gray-600 leading-relaxed mt-0.5">${bio.summary}</p>
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr ${p.color || 'from-red-600 to-amber-600'} flex items-center justify-center text-white shadow-md text-base">
+                                    <i class="fa-solid ${p.icon || 'fa-code'}"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-bold text-white leading-tight">${p.name}</h3>
+                                    <span class="text-[10px] text-red-400 font-semibold uppercase tracking-wider">${p.category}</span>
+                                </div>
+                            </div>
+                            <button onclick="toggleFavorite(${p.id})" class="text-slate-500 hover:text-red-500 transition-colors p-1">
+                                <i class="fa-${p.favorite ? 'solid text-red-500' : 'regular'} fa-heart text-sm"></i>
+                            </button>
+                        </div>
+                        <p class="text-slate-400 text-xs line-clamp-2 mb-4 leading-relaxed">${p.desc}</p>
                     </div>
-                </div>
-            `).join('');
-            document.getElementById('guide-modal').classList.remove('hidden');
+
+                    <div class="flex items-center gap-2 pt-3 border-t border-slate-800/80">
+                        <button onclick="${previewAction}" class="flex-grow py-2 px-3 bg-slate-900 hover:bg-slate-800 text-slate-200 rounded-xl text-xs font-semibold border border-slate-700/60 transition-all flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-eye text-red-400 text-[11px]"></i> Previsualizar
+                        </button>
+                        <a ${visitAction} class="py-2 px-3.5 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-red-600/20 flex items-center justify-center gap-1.5">
+                            Visitar <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                        </a>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
         }
 
-        function closeGuideModal() {
-            document.getElementById('guide-modal').classList.add('hidden');
-        }
-
-        function confirmExitQuiz() {
-            document.getElementById('confirm-modal-title').textContent = '¿Abandonar lección?';
-            document.getElementById('confirm-modal-text').textContent = 'Si sales ahora perderás el progreso de esta partida.';
-            const yesBtn = document.getElementById('confirm-modal-yes');
-            yesBtn.textContent = 'Salir al mapa';
-            yesBtn.onclick = () => {
-                closeConfirmModal();
-                returnToHome();
-            };
-            document.getElementById('confirm-modal').classList.remove('hidden');
-        }
-
-        function openResetModal() {
-            document.getElementById('confirm-modal-title').textContent = '¿Reiniciar progreso?';
-            document.getElementById('confirm-modal-text').textContent = 'Se borrarán todos tus XP, coronas y los 20 niveles desbloqueados.';
-            const yesBtn = document.getElementById('confirm-modal-yes');
-            yesBtn.textContent = 'Sí, borrar todo';
-            yesBtn.onclick = () => {
-                localStorage.removeItem(STORAGE_KEY);
-                userState = {
-                    xp: 0,
-                    bestStreak: 0,
-                    unlockedLevel: 1,
-                    crowns: {}
-                };
-                closeConfirmModal();
-                renderHome();
-            };
-            document.getElementById('confirm-modal').classList.remove('hidden');
-        }
-
-        function closeConfirmModal() {
-            document.getElementById('confirm-modal').classList.add('hidden');
-        }
-
-        document.addEventListener('keydown', (e) => {
-            if (document.getElementById('quiz-view').classList.contains('hidden')) return;
-
-            const maxKeys = quizState.currentOptions.length;
-            if (e.key >= '1' && e.key <= String(maxKeys) && !quizState.answered) {
-                const idx = parseInt(e.key, 10) - 1;
-                if (quizState.currentOptions[idx]) {
-                    selectOption(quizState.currentOptions[idx].id);
+        function setCategory(cat) {
+            currentFilter = cat;
+            ['all', 'Educación', 'Gaming', 'Herramientas'].forEach(c => {
+                const btn = document.getElementById(`btn-cat-${c}`);
+                if (btn) {
+                    if (c === cat) {
+                        btn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-600 text-white transition-all";
+                    } else {
+                        btn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-all";
+                    }
                 }
-            } else if (e.key === 'Enter') {
-                if (!quizState.answered && quizState.selectedOption) {
-                    checkAnswer();
-                } else if (quizState.answered) {
-                    nextQuestion();
-                }
+            });
+            renderProjects();
+        }
+
+        function filterProjects() {
+            renderProjects();
+        }
+
+        function toggleFavorite(id) {
+            const proj = projects.find(p => p.id === id);
+            if (proj) {
+                proj.favorite = !proj.favorite;
+                renderProjects();
+                updateStats();
             }
-        });
+        }
 
-        /* ==========================================================================
-           9. INICIALIZACIÓN
-           ========================================================================== */
-        window.onload = function () {
-            loadState();
-            renderHome();
-        };
+        function updateStats() {
+            document.getElementById('stat-total').innerText = projects.length;
+            document.getElementById('stat-favs').innerText = projects.filter(p => p.favorite).length;
+        }
+
+        // Control de contraseña con estilo Lobby
+        function checkPasswordAndExecute(actionCallback) {
+            pendingAction = actionCallback;
+            const modal = document.getElementById('password-modal');
+            const input = document.getElementById('project-password-input');
+            input.value = '';
+            document.getElementById('password-error').classList.add('hidden');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => input.focus(), 100);
+        }
+
+        function verifyProjectPassword() {
+            const pass = document.getElementById('project-password-input').value.trim();
+            if (pass === "javi decora neon") {
+                const actionToRun = pendingAction;
+                closePasswordModal();
+                if (actionToRun) {
+                    actionToRun();
+                }
+            } else {
+                document.getElementById('password-error').classList.remove('hidden');
+            }
+        }
+
+        function closePasswordModal() {
+            const modal = document.getElementById('password-modal');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            pendingAction = null;
+        }
+
+        // Modal de Vista Previa (Iframe)
+        function openPreview(url, title) {
+            const modal = document.getElementById('preview-modal');
+            document.getElementById('preview-title').innerText = title;
+            document.getElementById('preview-iframe').src = url;
+            document.getElementById('preview-external-link').href = url;
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        function closePreviewModal() {
+            const modal = document.getElementById('preview-modal');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            document.getElementById('preview-iframe').src = '';
+        }
     </script>
 </body>
 </html>
